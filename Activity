@@ -1,0 +1,61 @@
+from kivy.app import App
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.label import Label
+from kivy.uix.image import Image
+from kivy.uix.gridlayout import GridLayout
+from kivy.graphics import Color, Rectangle
+
+
+class MainApp(App):
+    def build(self):
+        # Main layout with background color
+        main_layout = BoxLayout(orientation="vertical", padding=10, spacing=10)
+        with main_layout.canvas.before:
+            Color(0.96, 0.91, 0.86, 1)  # Beige background color
+            self.rect = Rectangle(size=main_layout.size, pos=main_layout.pos)
+            main_layout.bind(size=self._update_rect, pos=self._update_rect)
+
+        # Grid layout for main buttons
+        grid_layout = GridLayout(cols=2, spacing=20, size_hint=(1, 0.8))
+
+        # Add buttons with icons and labels
+        grid_layout.add_widget(self.create_button("Journal", "journal_icon.jpg"))
+        grid_layout.add_widget(self.create_button("Meditate", "meditate_icon.jpg"))
+        grid_layout.add_widget(self.create_button("My Goals", "goals_icon.jpg"))
+        grid_layout.add_widget(self.create_button("Analysis", "market-analysis.webp"))
+
+        # Bottom navigation bar
+        bottom_nav = BoxLayout(orientation="horizontal", size_hint=(1, 0.2), spacing=20)
+
+        bottom_nav.add_widget(self.create_nav_button("Home", "bottom-navigation-bar-house-jump-home.png"))
+        bottom_nav.add_widget(self.create_nav_button("Community", "community.png"))
+        bottom_nav.add_widget(self.create_nav_button("Activity", "analysis.jpg"))
+        bottom_nav.add_widget(self.create_nav_button("Profile", "user_icon_001.jpg"))
+
+        # Add layouts to main layout
+        main_layout.add_widget(grid_layout)
+        main_layout.add_widget(bottom_nav)
+
+        return main_layout
+
+    def create_button(self, text, icon_path):
+        # Create a vertical layout for button with a smaller icon and label
+        layout = BoxLayout(orientation="vertical", padding=10, spacing=5)
+        layout.add_widget(Image(source=icon_path, size_hint=(1, 0.6)))  # Adjusted size_hint for smaller image
+        layout.add_widget(Label(text=text, size_hint=(1, 0.4), font_size="16sp", color=(0, 0, 0, 1)))  # Adjusted label size
+        return layout
+
+    def create_nav_button(self, text, icon_path):
+        # Create a vertical layout for nav button with a smaller icon
+        layout = BoxLayout(orientation="vertical", padding=5, spacing=2)
+        layout.add_widget(Image(source=icon_path, size_hint=(1, 0.5)))  # Adjusted size_hint for smaller nav image
+        layout.add_widget(Label(text=text, size_hint=(1, 0.5), font_size="14sp", color=(0, 0, 0, 1)))  # Adjusted label size
+        return layout
+
+    def _update_rect(self, instance, value):
+        self.rect.size = instance.size
+        self.rect.pos = instance.pos
+
+
+if __name__ == "__main__":
+    MainApp().run()
