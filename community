@@ -1,0 +1,118 @@
+from kivy.app import App
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.button import Button
+from kivy.uix.label import Label
+from kivy.uix.textinput import TextInput
+from kivy.uix.widget import Widget
+from kivy.graphics import Line, Color, Ellipse, Rectangle, RoundedRectangle
+from kivy.uix.image import Image
+
+class CustomIcon(Widget):
+    """Draws a black square with a small overlapping black circle"""
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.bind(pos=self.update_graphics, size=self.update_graphics)
+        self.update_graphics()
+
+    def update_graphics(self, *args):
+        self.canvas.clear()
+        with self.canvas:
+            Color(0, 0, 0, 1)  # Black color
+            size = (40, 40)
+            Line(rectangle=(self.x, self.y, size[0], size[1]), width=2)
+            Ellipse(pos=(self.x + 30, self.y), size=(15, 15))
+
+class IconGrid(GridLayout):
+    """Grid layout containing the custom icons"""
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.cols = 3
+        self.rows = 2
+        for _ in range(6):
+            self.add_widget(CustomIcon())
+
+class ChatBubble(BoxLayout):
+    """Chat bubble UI component"""
+    def __init__(self, **kwargs):
+        super().__init__(orientation="horizontal", **kwargs)
+        self.padding = 10
+        self.size_hint = (1, 0.15)
+        self.bind(pos=self.update_graphics, size=self.update_graphics)
+        self.update_graphics()
+
+    def update_graphics(self, *args):
+        self.canvas.before.clear()
+        with self.canvas.before:
+            Color(1, 1, 1, 1)  # White color
+            RoundedRectangle(pos=self.pos, size=self.size, radius=[15])
+        self.add_widget(Label(text="", size_hint=(None, None), size=(30, 30)))
+        self.add_widget(Label(text="", color=(0, 0, 0, 1)))
+
+class BottomNav(BoxLayout):
+    """Bottom navigation bar"""
+    def __init__(self, **kwargs):
+        super().__init__(orientation="horizontal", size_hint=(1, 0.1))
+
+        # Home icon using the uploaded image
+        home_icon = Image(source='/mnt/data/bottom-navigation-bar-house-jump-home.png', size_hint=(None, 1), width=40)
+        self.add_widget(home_icon)
+
+        icons = ["\U0001F4F0", "\U0001F4CA", "\U0001F464"]
+        for icon in icons:
+            self.add_widget(Button(text=icon, background_normal='', background_color=[1, 1, 1, 0], color=(0, 0, 0, 1)))
+
+class MainLayout(BoxLayout):
+    """Main UI Layout"""
+    def __init__(self, **kwargs):
+        super().__init__(orientation="vertical")
+
+        # Set background color for the entire layout
+        with self.canvas.before:
+            Color(0.94, 0.91, 0.85, 1)  # Beige-like background color
+            Rectangle(pos=self.pos, size=self.size)
+        self.bind(pos=self.update_background, size=self.update_background)
+
+        # Community Section
+        community_box = BoxLayout(orientation="vertical", size_hint=(1, 0.3))
+        community_label = Label(text="Community", size_hint=(1, 0.2), color=(0, 0, 0, 1), bold=True, font_size='20sp')
+        community_box.add_widget(community_label)
+        community_box.add_widget(ChatBubble())
+        self.add_widget(community_box)
+
+        # Icon Grid
+        icon_grid = IconGrid()
+        self.add_widget(icon_grid)
+
+        # Input Box
+        input_box = BoxLayout(size_hint=(1, 0.1))
+
+        text_input = TextInput(hint_text="How are u feeling?", background_color=(1, 1, 1, 1), foreground_color=(0, 0, 0, 1))
+        input_box.add_widget(text_input)
+
+        input_box.add_widget(Button(text="\u2191", size_hint=(None, 1), width=40, background_color=[1, 1, 1, 1], color=(0, 0.5, 0, 1)))
+        self.add_widget(input_box)
+
+        # Bottom Navigation
+        bottom_nav = Image(
+        source="C:\\Users\\Admin\\Downloads\\Mainbar1.png",
+        allow_stretch=True,
+        size_hint=(1,1),
+        height=0,
+        keep_ratio=True
+        )    
+        self.add_widget(bottom_nav)
+
+    def update_background(self, *args):
+        self.canvas.before.clear()
+        with self.canvas.before:
+            Color(0.94, 0.91, 0.85, 1)
+            Rectangle(pos=self.pos, size=self.size)
+
+class KivyApp(App):
+    """Main Kivy App"""
+    def build(self):
+        return MainLayout()
+
+if __name__ == "__main__":
+    KivyApp().run()
