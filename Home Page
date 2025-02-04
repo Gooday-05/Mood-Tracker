@@ -1,0 +1,61 @@
+from kivy.app import App
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.label import Label
+from kivy.uix.image import Image
+from kivy.uix.button import Button
+from kivy.graphics import Color, Rectangle, Line
+
+
+class MainScreen(BoxLayout):
+    def __init__(self, **kwargs):
+        super().__init__(orientation="vertical", **kwargs)
+        self.create_ui()
+
+    def create_ui(self):
+        # Background color
+        with self.canvas.before:
+            Color(0.96, 0.92, 0.88, 1)  # Light beige background
+            self.rect = Rectangle(pos=self.pos, size=self.size)
+            self.bind(pos=self.update_rect, size=self.update_rect)
+
+        # Header (Profile Icon & Greeting)
+        header = BoxLayout(size_hint_y=None, height=60, padding=10, spacing=10)
+        header.add_widget(Image(source="profile_icon.png", size_hint=(None, None), size=(40, 40)))
+        header.add_widget(Label(text="Hello, Name!", font_size=20, color=(0, 0, 0, 1)))
+        self.add_widget(header)
+
+        # Large Text Box with border
+        text_box = BoxLayout(size_hint_y=None, height=150, padding=10)
+        with text_box.canvas.before:
+            Color(0, 0, 0, 1)  # Black border
+            Line(rectangle=(text_box.x, text_box.y, text_box.width, text_box.height), width=2)
+        text_box.add_widget(Label(text=""))
+        self.add_widget(text_box)
+
+        # Mood Timeline with Emojis
+        timeline = BoxLayout(size_hint_y=None, height=50, spacing=10, padding=20)
+        timeline.add_widget(Label(text="🔴", font_size=30))
+        timeline.add_widget(Label(text="🔵", font_size=30))
+        timeline.add_widget(Label(text="🟢", font_size=30))
+        self.add_widget(timeline)
+
+        # Bottom Navigation Bar
+        nav_bar = BoxLayout(size_hint_y=None, height=60, padding=10, spacing=20)
+        nav_bar.add_widget(Button(text="🏠", background_color=(0, 0, 0, 0)))
+        nav_bar.add_widget(Button(text="💬", background_color=(0, 0, 0, 0)))
+        nav_bar.add_widget(Button(text="📊", background_color=(0, 0, 0, 0)))
+        nav_bar.add_widget(Button(text="👤", background_color=(0, 0, 0, 0)))
+        self.add_widget(nav_bar)
+
+    def update_rect(self, *args):
+        self.rect.pos = self.pos
+        self.rect.size = self.size
+
+
+class MoodTrackerApp(App):
+    def build(self):
+        return MainScreen()
+
+
+if __name__ == "__main__":
+    MoodTrackerApp().run()
