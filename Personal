@@ -12,10 +12,10 @@ class MainLayout(BoxLayout):
         self.spacing = 10
         self.padding = 10
         
-        # Optional: Set window size
+        # Set mobile-like window size
         Window.size = (300, 500)
         
-        # Draw background color (#e5dbc5)
+        # Background color (#e5dbc5)
         with self.canvas.before:
             Color(229/255, 219/255, 197/255, 1)  # RGBA for #e5dbc5
             self.bg_rect = Rectangle(pos=self.pos, size=self.size)
@@ -79,10 +79,19 @@ class MainLayout(BoxLayout):
         # Middle Section
         # -------------------
         mid_layout = BoxLayout(orientation='vertical')
-        
+
+        # 🔥 Fire Emoji Above Streak Image
+        fire_emoji_label = Label(
+            text="\U0001F525",  # 🔥 Fire emoji using Unicode
+            font_size='40sp',
+            halign='center',
+            valign='middle'
+        )
+        mid_layout.add_widget(fire_emoji_label)
+
         # Friend Streak Image (e.g., a flame icon)
         streak_img = Image(
-            source="C:\\Users\\admin\\Desktop\\streak.jpg",  # Update with your friend streak image path
+            source="C:\\Users\\admin\\Desktop\\streak.jpg",  # Update with your streak image path
             size_hint=(1, None),
             height=100,
             allow_stretch=True,
@@ -90,7 +99,7 @@ class MainLayout(BoxLayout):
         )
         mid_layout.add_widget(streak_img)
         
-        # Optionally, a Label for additional text (e.g., "NO.")
+        # "NO." Label
         no_label = Label(
             text="NO.",
             font_size='24sp',
