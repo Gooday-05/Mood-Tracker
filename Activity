@@ -1,61 +1,230 @@
-from kivy.app import App
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.label import Label
-from kivy.uix.image import Image
-from kivy.uix.gridlayout import GridLayout
-from kivy.graphics import Color, Rectangle
+from kivy.lang import Builder
+from kivy.core.window import Window
+from kivymd.app import MDApp
+from kivymd.uix.screen import MDScreen
+from kivymd.uix.screenmanager import MDScreenManager
 
+# Set window size to simulate a mobile screen
+Window.size = (360, 640)
 
-class MainApp(App):
+KV = """
+MDScreenManager:
+
+    HomeScreen:
+    JournalScreen:
+    MeditateScreen:
+    GoalsScreen:
+    AnalysisScreen:
+    ProfileScreen:
+
+<HomeScreen>:
+    name: "home"
+    
+    MDBoxLayout:
+        orientation: "vertical"
+        
+        # TOP APP BAR
+        MDTopAppBar:
+            title: "Mindful Tracker"
+            md_bg_color: 0.4, 0.2, 0.6, 1
+            specific_text_color: 1, 1, 1, 1
+            size_hint_y: None
+            height: "56dp"
+
+        # MAIN CONTENT WITH SCROLL SUPPORT
+        ScrollView:
+            do_scroll_x: False
+            MDBoxLayout:
+                orientation: "vertical"
+                padding: "10dp"
+                spacing: "10dp"
+                adaptive_height: True  # Fix disappearing issue
+                
+                GridLayout:
+                    cols: 2
+                    spacing: "10dp"
+                    padding: "10dp"
+                    size_hint_y: None
+                    height: self.minimum_height  # Ensures proper height for items
+
+                    MDCard:
+                        size_hint: None, None
+                        size: "150dp", "150dp"
+                        elevation: 8
+                        radius: [20,]
+                        MDBoxLayout:
+                            orientation: "vertical"
+                            Image:
+                                source: "journal_icon.jpg"
+                                size_hint_y: 0.7
+                                allow_stretch: True
+                            MDRaisedButton:
+                                text: "Journal"
+                                size_hint_y: None
+                                height: "40dp"
+                                on_release: app.root.current = "journal"
+
+                    MDCard:
+                        size_hint: None, None
+                        size: "150dp", "150dp"
+                        elevation: 8
+                        radius: [20,]
+                        MDBoxLayout:
+                            orientation: "vertical"
+                            Image:
+                                source: "meditate_icon.jpg"
+                                size_hint_y: 0.7
+                                allow_stretch: True
+                            MDRaisedButton:
+                                text: "Meditate"
+                                size_hint_y: None
+                                height: "40dp"
+                                on_release: app.root.current = "meditate"
+
+                    MDCard:
+                        size_hint: None, None
+                        size: "150dp", "150dp"
+                        elevation: 8
+                        radius: [20,]
+                        MDBoxLayout:
+                            orientation: "vertical"
+                            Image:
+                                source: "goals_icon.jpg"
+                                size_hint_y: 0.7
+                                allow_stretch: True
+                            MDRaisedButton:
+                                text: "My Goals"
+                                size_hint_y: None
+                                height: "40dp"
+                                on_release: app.root.current = "goals"
+
+                    MDCard:
+                        size_hint: None, None
+                        size: "150dp", "150dp"
+                        elevation: 8
+                        radius: [20,]
+                        MDBoxLayout:
+                            orientation: "vertical"
+                            Image:
+                                source: "analysis_icon.jpg"
+                                size_hint_y: 0.7
+                                allow_stretch: True
+                            MDRaisedButton:
+                                text: "Analysis"
+                                size_hint_y: None
+                                height: "40dp"
+                                on_release: app.root.current = "analysis"
+
+    # BOTTOM NAVIGATION BAR
+    MDBottomNavigation:
+        size_hint_y: None
+        height: "50dp"
+
+        MDBottomNavigationItem:
+            name: "home"
+            text: "Home"
+            icon: "home"
+            on_tab_release: app.root.current = "home"
+
+        MDBottomNavigationItem:
+            name: "profile"
+            text: "Profile"
+            icon: "account"
+            on_tab_release: app.root.current = "profile"
+
+        MDBottomNavigationItem:
+            name: "community"
+            text: "Community"
+            icon: "forum"
+            on_tab_release: app.root.current = "community"
+
+        MDBottomNavigationItem:
+            name: "activity"
+            text: "Activity"
+            icon: "chart-bar"
+            on_tab_release: app.root.current = "activity"
+
+# ADDITIONAL SCREENS
+<JournalScreen>:
+    name: "journal"
+    MDBoxLayout:
+        orientation: "vertical"
+        MDTopAppBar:
+            title: "Journal"
+            left_action_items: [["arrow-left", lambda x: app.go_back()]]
+        MDLabel:
+            text: "Journal Screen"
+            halign: "center"
+
+<MeditateScreen>:
+    name: "meditate"
+    MDBoxLayout:
+        orientation: "vertical"
+        MDTopAppBar:
+            title: "Meditate"
+            left_action_items: [["arrow-left", lambda x: app.go_back()]]
+        MDLabel:
+            text: "Meditate Screen"
+            halign: "center"
+
+<GoalsScreen>:
+    name: "goals"
+    MDBoxLayout:
+        orientation: "vertical"
+        MDTopAppBar:
+            title: "Goals"
+            left_action_items: [["arrow-left", lambda x: app.go_back()]]
+        MDLabel:
+            text: "Goals Screen"
+            halign: "center"
+
+<AnalysisScreen>:
+    name: "analysis"
+    MDBoxLayout:
+        orientation: "vertical"
+        MDTopAppBar:
+            title: "Analysis"
+            left_action_items: [["arrow-left", lambda x: app.go_back()]]
+        MDLabel:
+            text: "Analysis Screen"
+            halign: "center"
+
+<ProfileScreen>:
+    name: "profile"
+    MDBoxLayout:
+        orientation: "vertical"
+        MDTopAppBar:
+            title: "Profile"
+            left_action_items: [["arrow-left", lambda x: app.go_back()]]
+        MDLabel:
+            text: "Profile Screen"
+            halign: "center"
+"""
+
+class HomeScreen(MDScreen):
+    pass
+
+class JournalScreen(MDScreen):
+    pass
+
+class MeditateScreen(MDScreen):
+    pass
+
+class GoalsScreen(MDScreen):
+    pass
+
+class AnalysisScreen(MDScreen):
+    pass
+
+class ProfileScreen(MDScreen):
+    pass
+
+class MainApp(MDApp):
     def build(self):
-        # Main layout with background color
-        main_layout = BoxLayout(orientation="vertical", padding=10, spacing=10)
-        with main_layout.canvas.before:
-            Color(0.96, 0.91, 0.86, 1)  # Beige background color
-            self.rect = Rectangle(size=main_layout.size, pos=main_layout.pos)
-            main_layout.bind(size=self._update_rect, pos=self._update_rect)
+        return Builder.load_string(KV)
 
-        # Grid layout for main buttons
-        grid_layout = GridLayout(cols=2, spacing=20, size_hint=(1, 0.8))
-
-        # Add buttons with icons and labels
-        grid_layout.add_widget(self.create_button("Journal", "journal_icon.jpg"))
-        grid_layout.add_widget(self.create_button("Meditate", "meditate_icon.jpg"))
-        grid_layout.add_widget(self.create_button("My Goals", "goals_icon.jpg"))
-        grid_layout.add_widget(self.create_button("Analysis", "market-analysis.webp"))
-
-        # Bottom navigation bar
-        bottom_nav = BoxLayout(orientation="horizontal", size_hint=(1, 0.2), spacing=20)
-
-        bottom_nav.add_widget(self.create_nav_button("Home", "bottom-navigation-bar-house-jump-home.png"))
-        bottom_nav.add_widget(self.create_nav_button("Community", "community.png"))
-        bottom_nav.add_widget(self.create_nav_button("Activity", "analysis.jpg"))
-        bottom_nav.add_widget(self.create_nav_button("Profile", "user_icon_001.jpg"))
-
-        # Add layouts to main layout
-        main_layout.add_widget(grid_layout)
-        main_layout.add_widget(bottom_nav)
-
-        return main_layout
-
-    def create_button(self, text, icon_path):
-        # Create a vertical layout for button with a smaller icon and label
-        layout = BoxLayout(orientation="vertical", padding=10, spacing=5)
-        layout.add_widget(Image(source=icon_path, size_hint=(1, 0.6)))  # Adjusted size_hint for smaller image
-        layout.add_widget(Label(text=text, size_hint=(1, 0.4), font_size="16sp", color=(0, 0, 0, 1)))  # Adjusted label size
-        return layout
-
-    def create_nav_button(self, text, icon_path):
-        # Create a vertical layout for nav button with a smaller icon
-        layout = BoxLayout(orientation="vertical", padding=5, spacing=2)
-        layout.add_widget(Image(source=icon_path, size_hint=(1, 0.5)))  # Adjusted size_hint for smaller nav image
-        layout.add_widget(Label(text=text, size_hint=(1, 0.5), font_size="14sp", color=(0, 0, 0, 1)))  # Adjusted label size
-        return layout
-
-    def _update_rect(self, instance, value):
-        self.rect.size = instance.size
-        self.rect.pos = instance.pos
-
+    def go_back(self):
+        self.root.current = "home"
 
 if __name__ == "__main__":
     MainApp().run()
