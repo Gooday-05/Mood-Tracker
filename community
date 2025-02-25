@@ -48,7 +48,6 @@ BoxLayout:
 
         MDBoxLayout:
             size_hint_x: 0.85
-            md_bg_color: 1, 1, 1, 1  # White background
             radius: [25, 25, 25, 25]
             MDTextField:
                 id: message_input
