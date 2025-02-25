@@ -1,7 +1,6 @@
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
-from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
 from kivy.uix.image import Image
 from kivy.uix.screenmanager import ScreenManager, Screen
@@ -30,15 +29,9 @@ class MainScreen(BoxLayout):
             self.rect = Rectangle(pos=self.pos, size=self.size)
         self.bind(pos=self.update_rect, size=self.update_rect)
 
-        # ✅ Header (Profile Icon & Name Input)
+        # ✅ Header (Profile Icon)
         header = BoxLayout(size_hint_y=0.1, padding=10, spacing=10)
         header.add_widget(Image(source="profile_icon.png", size_hint=(None, None), size=(50, 50)))
-        
-        self.name_input = TextInput(
-            text="", font_size=20, multiline=False, hint_text="Enter Name", size_hint_x=0.8
-        )
-        self.name_input.bind(on_text_validate=self.update_greeting)
-        header.add_widget(self.name_input)
         
         self.add_widget(header)
 
@@ -46,11 +39,10 @@ class MainScreen(BoxLayout):
         self.greeting_label = Label(text="Welcome!", font_size=22, size_hint_y=0.1)
         self.add_widget(self.greeting_label)
 
-        # ✅ Daily Affirmation
-        affirmations = ["You are enough!", "Today is a fresh start!", "Believe in yourself!", "You can do hard things!"]
-        today_index = datetime.now().day % len(affirmations)
-        self.affirmation_label = Label(text=affirmations[today_index], font_size=20, size_hint_y=0.2)
-
+        # ✅ Daily Affirmation from API
+        self.affirmation_label = Label(text="Fetching affirmation...", font_size=20, size_hint_y=0.2)
+        self.get_affirmation()
+        
         text_box = BoxLayout(size_hint_y=0.2, padding=10)
         text_box.add_widget(self.affirmation_label)
         self.add_widget(text_box)
@@ -80,16 +72,19 @@ class MainScreen(BoxLayout):
 
         self.add_widget(nav_bar)
 
-    def update_greeting(self, instance):
-        self.greeting_label.text = f"Hello, {instance.text}!"
+    def get_affirmation(self):
+        try:
+            response = requests.get("https://www.affirmations.dev/")
+            if response.status_code == 200:
+                affirmation = response.json().get("affirmation", "Stay positive!")
+                self.affirmation_label.text = affirmation
+            else:
+                self.affirmation_label.text = "Stay positive!"
+        except:
+            self.affirmation_label.text = "Stay positive!"
 
     def log_mood(self, mood, instance):
-        user = self.name_input.text.strip()
-        if not user:
-            self.greeting_label.text = "Please enter your name first!"
-            return
-        
-        data = {"user": user, "mood": mood}
+        data = {"mood": mood}
         response = requests.post("http://localhost:3000/log_mood", json=data)
 
         if response.status_code == 200:
