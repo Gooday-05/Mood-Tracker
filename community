@@ -1,7 +1,6 @@
-
 from kivy.lang import Builder
 from kivy.uix.widget import Widget
-from kivy.graphics import Line, Color, Ellipse, Rectangle
+from kivy.graphics import Line, Color, Ellipse, RoundedRectangle
 from kivymd.app import MDApp
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.gridlayout import MDGridLayout
@@ -22,28 +21,51 @@ BoxLayout:
     MDBoxLayout:
         size_hint_y: 0.1
         padding: 10
+        canvas.before:
+            Color:
+                rgba: 0, 0, 0, 1
+            Line:
+                points: self.x, self.y, self.right, self.y
+                width: 2
         MDLabel:
             text: "Community"
             font_style: "H5"
             halign: "center"
     
     IconGrid:
-        size_hint_y: 0.4
+        size_hint_y: 0.3
 
+    MDBoxLayout:
+        size_hint_y: 0.2
+        padding: 10
+        spacing: 10
+
+     
     MDBoxLayout:
         size_hint_y: 0.1
         padding: 10
         spacing: 10
 
-        MDTextField:
-            id: message_input
-            hint_text: "How are you feeling?"
-            mode: "rectangle"
-            background_color: 1, 1, 1, 1  # White input field
+        MDBoxLayout:
+            size_hint_x: 0.85
+            md_bg_color: 1, 1, 1, 1  # White background
+            radius: [25, 25, 25, 25]
+            MDTextField:
+                id: message_input
+                hint_text: "How are u feeling?"
+                mode: "rectangle"
+                size_hint_x: 0.9
+                background_color: 0, 0, 0, 0  # Transparent background
+                font_size: 18
+                hint_text_color: 0.6, 0.6, 0.6, 1
 
-        MDRaisedButton:
-            text: "Send"
+        MDIconButton:
+            size_hint_x: 0.15
+            md_bg_color: 0.8, 1, 0.8, 1  # Light green color
+            icon: "arrow-up-bold-circle"
+            font_size: 24
             on_release: app.send_message()
+            radius: [25, 25, 25, 25]
 
     MDBoxLayout:
         size_hint_y: 0.1
@@ -51,16 +73,20 @@ BoxLayout:
         spacing: 20
         MDIconButton:
             icon: "home"
+            on_release: app.change_screen("home")
         MDIconButton:
             icon: "chat"
+            on_release: app.change_screen("chat")
         MDIconButton:
             icon: "chart-bar"
+            on_release: app.change_screen("stats")
         MDIconButton:
             icon: "account"
+            on_release: app.change_screen("profile")
 """
 
 class CustomIcon(Widget):
-    """Draws a black square with a small overlapping black circle"""
+    """Draws a rounded square with an overlapping circle"""
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.bind(pos=self.update_graphics, size=self.update_graphics)
@@ -70,9 +96,9 @@ class CustomIcon(Widget):
         self.canvas.clear()
         with self.canvas:
             Color(0, 0, 0, 1)
-            size = (30, 30)
-            Line(rectangle=(self.x, self.y, size[0], size[1]), width=2)
-            Ellipse(pos=(self.x + 30, self.y), size=(10, 10))
+            size = (50, 50)
+            RoundedRectangle(pos=self.pos, size=size, radius=[15])
+            Ellipse(pos=(self.x + 40, self.y - 10), size=(20, 20))
 
 class IconGrid(MDGridLayout):
     """Grid layout containing the custom icons"""
@@ -91,6 +117,8 @@ class KivyAndroidApp(MDApp):
             print(f"User: {message}")  # Simulating a chat message being sent
             self.root.ids.message_input.text = ""  # Clear input field after sending
 
+    def change_screen(self, screen_name):
+        print(f"Switching to {screen_name} screen")  # Placeholder for screen navigation logic
+
 if __name__ == "__main__":
     KivyAndroidApp().run()
-    
