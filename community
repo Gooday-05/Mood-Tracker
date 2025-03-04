@@ -1,10 +1,11 @@
 from kivy.lang import Builder
 from kivy.uix.widget import Widget
 from kivy.graphics import Line, Color, Ellipse, RoundedRectangle
+from kivy.uix.behaviors import ButtonBehavior
 from kivymd.app import MDApp
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.gridlayout import MDGridLayout
-from kivymd.uix.button import MDIconButton, MDRaisedButton
+from kivymd.uix.button import MDIconButton
 from kivymd.uix.label import MDLabel
 from kivymd.uix.textfield import MDTextField
 
@@ -84,8 +85,8 @@ BoxLayout:
             on_release: app.change_screen("profile")
 """
 
-class CustomIcon(Widget):
-    """Draws a rounded square with an overlapping circle"""
+class CustomIcon(ButtonBehavior, Widget):
+    """Clickable chat bubble"""
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.bind(pos=self.update_graphics, size=self.update_graphics)
@@ -99,8 +100,11 @@ class CustomIcon(Widget):
             RoundedRectangle(pos=self.pos, size=size, radius=[15])
             Ellipse(pos=(self.x + 40, self.y - 10), size=(20, 20))
 
+    def on_press(self):
+        print("Chat bubble clicked!")  # Action when clicked
+
 class IconGrid(MDGridLayout):
-    """Grid layout containing the custom icons"""
+    """Grid layout containing the clickable custom icons"""
     def __init__(self, **kwargs):
         super().__init__(cols=3, rows=2, **kwargs)
         for _ in range(6):
