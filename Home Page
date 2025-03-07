@@ -1,38 +1,34 @@
-from kivy.app import App
+from kivymd.app import MDApp
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
 from kivy.uix.image import Image
-from kivy.uix.screenmanager import Screen
+from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.graphics import Color, Rectangle
 from kivy.core.window import Window
-from kivy.config import Config
+from kivy.metrics import dp
+from kivy.lang import Builder
 import requests
 from datetime import datetime
 from functools import partial
 
-# ✅ Set Fullscreen Mode for Android
+Window.size = (dp(360), dp(640))  
+Window.softinput_mode = "below_target"
 
-
-# ✅ Enable Mobile Keyboard
-Config.set('kivy', 'keyboard_mode', 'dock')
-
-class HomePageScreen(Screen):  # Changed from BoxLayout to Screen
+class HomePageScreen(Screen):  
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        layout = BoxLayout(orientation="vertical", size_hint=(1, 1))  # ✅ Ensure it fills the screen
+        layout = BoxLayout(orientation="vertical", size_hint=(1, 1))  
         self.create_ui(layout)
-        self.add_widget(layout)  # Add layout to the screen
+        self.add_widget(layout)  
 
     def create_ui(self, layout):
-        # ✅ Background color
         with layout.canvas.before:
             Color(0.96, 0.92, 0.88, 1)
             self.rect = Rectangle(pos=layout.pos, size=layout.size)
         layout.bind(pos=self.update_rect, size=self.update_rect)
 
-        # ✅ Header (Profile Icon & Name Input)
         header = BoxLayout(size_hint_y=0.1, padding=10, spacing=10)
         header.add_widget(Image(source="profile_icon.png", size_hint=(None, None), size=(50, 50)))
 
@@ -44,11 +40,9 @@ class HomePageScreen(Screen):  # Changed from BoxLayout to Screen
 
         layout.add_widget(header)
 
-        # ✅ Greeting Label
         self.greeting_label = Label(text="Welcome!", font_size=22, size_hint_y=0.1)
         layout.add_widget(self.greeting_label)
 
-        # ✅ Daily Affirmation
         affirmations = ["You are enough!", "Today is a fresh start!", "Believe in yourself!", "You can do hard things!"]
         today_index = datetime.now().day % len(affirmations)
         self.affirmation_label = Label(text=affirmations[today_index], font_size=20, size_hint_y=0.2)
@@ -57,7 +51,6 @@ class HomePageScreen(Screen):  # Changed from BoxLayout to Screen
         text_box.add_widget(self.affirmation_label)
         layout.add_widget(text_box)
 
-        # ✅ Mood Selection (Larger Buttons for Touchscreens)
         mood_bar = BoxLayout(size_hint_y=0.15, spacing=10, padding=20)
         moods = {"😢": "Sad", "😐": "Neutral", "😊": "Happy"}
 
@@ -68,7 +61,6 @@ class HomePageScreen(Screen):  # Changed from BoxLayout to Screen
 
         layout.add_widget(mood_bar)
 
-        # ✅ Bottom Navigation (Larger for Mobile)
         nav_bar = BoxLayout(size_hint_y=0.1, padding=10, spacing=20)
         home_btn = Button(text="🏠", font_size=30, size_hint_x=0.25)
         community_btn = Button(text="💬", font_size=30, size_hint_x=0.25)
@@ -102,3 +94,13 @@ class HomePageScreen(Screen):  # Changed from BoxLayout to Screen
     def update_rect(self, *args):
         self.rect.pos = self.pos
         self.rect.size = self.size
+
+class MindfulApp(MDApp):  
+    def build(self):
+        Builder.load_file("mindfultracker.kv")
+        sm = ScreenManager()
+        sm.add_widget(HomePageScreen(name="homepage"))
+        return sm
+
+if __name__ == "__main__":
+    MindfulApp().run()
