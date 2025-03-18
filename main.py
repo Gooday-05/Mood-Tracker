@@ -39,4 +39,3 @@ class MindfulApp(MDApp):
 
 if __name__ == "__main__":
     MindfulApp().run()
-
