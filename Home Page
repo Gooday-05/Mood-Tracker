@@ -24,30 +24,28 @@ class HomePageScreen(Screen):
         self.add_widget(layout)  
 
     def create_ui(self, layout):
-        with layout.canvas.before:
+        with self.canvas.before:
             Color(0.96, 0.92, 0.88, 1)
-            self.rect = Rectangle(pos=layout.pos, size=layout.size)
-        layout.bind(pos=self.update_rect, size=self.update_rect)
+            self.rect = Rectangle(pos=self.pos, size=self.size)
+        self.bind(pos=self.update_rect, size=self.update_rect)
 
-        header = BoxLayout(size_hint_y=0.1, padding=10, spacing=10)
+        header = BoxLayout(size_hint_y=0.15, padding=20, spacing=15)
         header.add_widget(Image(source="profile_icon.png", size_hint=(None, None), size=(50, 50)))
 
-        self.name_input = TextInput(
-            text="", font_size=20, multiline=False, hint_text="Enter Name", size_hint_x=0.8
-        )
-        self.name_input.bind(on_text_validate=self.update_greeting)
-        header.add_widget(self.name_input)
+        self.greeting_label = Label(text="Hello, Name!", font_size=22, bold=True, color=(0, 0, 0, 1))
+        header.add_widget(self.greeting_label)
 
         layout.add_widget(header)
 
-        self.greeting_label = Label(text="Welcome!", font_size=22, size_hint_y=0.1)
-        layout.add_widget(self.greeting_label)
+        text_box = BoxLayout(size_hint_y=0.3, padding=20)
+        with text_box.canvas.before:
+            Color(0, 0, 0, 1)
+            self.border_rect = Rectangle(pos=text_box.pos, size=text_box.size)
+        text_box.bind(pos=self.update_border, size=self.update_border)
 
         affirmations = ["You are enough!", "Today is a fresh start!", "Believe in yourself!", "You can do hard things!"]
         today_index = datetime.now().day % len(affirmations)
-        self.affirmation_label = Label(text=affirmations[today_index], font_size=20, size_hint_y=0.2)
-
-        text_box = BoxLayout(size_hint_y=0.2, padding=10)
+        self.affirmation_label = Label(text=affirmations[today_index], font_size=20, color=(0, 0, 0, 1))
         text_box.add_widget(self.affirmation_label)
         layout.add_widget(text_box)
 
@@ -78,8 +76,8 @@ class HomePageScreen(Screen):
         self.greeting_label.text = f"Hello, {instance.text}!"
 
     def log_mood(self, mood, instance):
-        user = self.name_input.text.strip()
-        if not user:
+        user = self.greeting_label.text.replace("Hello, ", "").strip()
+        if user == "Name!":
             self.greeting_label.text = "Please enter your name first!"
             return
 
@@ -95,6 +93,10 @@ class HomePageScreen(Screen):
         self.rect.pos = self.pos
         self.rect.size = self.size
 
+    def update_border(self, *args):
+        self.border_rect.pos = args[0].pos
+        self.border_rect.size = args[0].size
+
 class MindfulApp(MDApp):  
     def build(self):
         Builder.load_file("mindfultracker.kv")
@@ -104,3 +106,4 @@ class MindfulApp(MDApp):
 
 if __name__ == "__main__":
     MindfulApp().run()
+s
