@@ -1,112 +1,121 @@
-ScreenManager:
-    StartScreen:
-    HomePageScreen:
-
 <StartScreen>:
-    name: "start"
-    BoxLayout:
-        orientation: "vertical"
-        spacing: dp(20)
-        padding: dp(40)
+    canvas.before:
+        Color:
+            rgba: 0.96, 0.92, 0.88, 1  # Light beige background
+        Rectangle:
+            pos: self.pos
+            size: self.size
 
-        Label:
-            text: "Mental Health Check-In"
-            font_size: dp(24)
-            size_hint_y: None
-            height: dp(50)
+    Label:
+        text: "Mental Health Check-In"
+        font_size: 24
+        color: 0, 0, 0, 1  # Black text for visibility
+        pos_hint: {"center_x": 0.5, "center_y": 0.8}
+
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: 10
+        padding: 20
+        size_hint_y: 0.3
+        pos_hint: {"center_x": 0.5, "center_y": 0.5}
 
         Button:
             text: "Take Questionnaire"
-            size_hint_y: None
-            height: dp(50)
-            on_release: app.root.current = "homepage"
+            font_size: 16
+            background_color: 0.2, 0.2, 0.2, 1  # Dark gray for contrast
+            color: 1, 1, 1, 1  # White text for visibility
+            on_press: app.root.current = "homepage"
 
         Button:
             text: "Login Directly"
-            size_hint_y: None
-            height: dp(50)
-            on_release: app.root.current = "homepage"
+            font_size: 16
+            background_color: 0.2, 0.2, 0.2, 1
+            color: 1, 1, 1, 1
+            on_press: app.root.current = "homepage"
 
 <HomePageScreen>:
-    name: "homepage"
+    canvas.before:
+        Color:
+            rgba: 0.96, 0.92, 0.88, 1  # Light beige background
+        Rectangle:
+            pos: self.pos
+            size: self.size
 
     BoxLayout:
-        orientation: "vertical"
+        orientation: 'vertical'
+        size_hint: 1, 1
 
         BoxLayout:
-            size_hint_y: 0.1
-            padding: dp(10)
-            spacing: dp(10)
+            size_hint_y: 0.15
+            padding: 20
+            spacing: 15
 
             Image:
                 source: "profile_icon.png"
                 size_hint: None, None
-                size: dp(50), dp(50)
+                size: 50, 50
 
-            TextInput:
-                id: name_input
-                hint_text: "Enter Name"
-                font_size: dp(20)
-                multiline: False
-                size_hint_x: 0.8
-                on_text_validate: root.update_greeting(self)
+            Label:
+                id: greeting_label
+                text: "Hello, Name!"
+                font_size: 22
+                bold: True
+                color: 0, 0, 0, 1
 
-        Label:
-            id: greeting_label
-            text: "Welcome!"
-            font_size: dp(22)
-            size_hint_y: 0.1
+        BoxLayout:
+            size_hint_y: 0.3
+            padding: 20
 
-        Label:
-            id: affirmation_label
-            text: "Believe in yourself!"
-            font_size: dp(20)
-            size_hint_y: 0.2
+            Label:
+                id: affirmation_label
+                text: "You are enough!"
+                font_size: 20
+                color: 0, 0, 0, 1
 
         BoxLayout:
             size_hint_y: 0.15
-            spacing: dp(10)
-            padding: dp(20)
+            spacing: 10
+            padding: 20
 
             Button:
                 text: "😢"
-                font_size: dp(40)
+                font_size: 40
                 size_hint: 0.3, 0.8
                 on_press: root.log_mood("Sad")
 
             Button:
                 text: "😐"
-                font_size: dp(40)
+                font_size: 40
                 size_hint: 0.3, 0.8
                 on_press: root.log_mood("Neutral")
 
             Button:
                 text: "😊"
-                font_size: dp(40)
+                font_size: 40
                 size_hint: 0.3, 0.8
                 on_press: root.log_mood("Happy")
 
         BoxLayout:
             size_hint_y: 0.1
-            padding: dp(10)
-            spacing: dp(20)
+            padding: 10
+            spacing: 20
 
             Button:
                 text: "🏠"
-                font_size: dp(30)
+                font_size: 30
                 size_hint_x: 0.25
 
             Button:
                 text: "💬"
-                font_size: dp(30)
+                font_size: 30
                 size_hint_x: 0.25
 
             Button:
                 text: "📊"
-                font_size: dp(30)
+                font_size: 30
                 size_hint_x: 0.25
 
             Button:
                 text: "👤"
-                font_size: dp(30)
+                font_size: 30
                 size_hint_x: 0.25
