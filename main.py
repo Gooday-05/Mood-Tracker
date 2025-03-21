@@ -5,7 +5,7 @@ from kivy.core.window import Window
 from kivy.metrics import dp
 import requests
 
-Window.size = (dp(360), dp(640))  
+Window.size = (dp(360), dp(640))
 Window.softinput_mode = "below_target"
 
 class StartScreen(Screen):
@@ -29,13 +29,24 @@ class HomePageScreen(Screen):
         else:
             print("Error saving mood.")
 
-class MindfulApp(MDApp):  
+class CommunityScreen(Screen):
+    def send_message(self):
+        message = self.ids.message_input.text.strip()
+        if message:
+            print(f"User: {message}")  # Placeholder for message handling
+            self.ids.message_input.text = ""  # Clear input after sending
+
+class MindfulApp(MDApp):
     def build(self):
         Builder.load_file("mindfultracker.kv")
         sm = ScreenManager()
-        sm.add_widget(StartScreen(name="start"))  
+        sm.add_widget(StartScreen(name="start"))
         sm.add_widget(HomePageScreen(name="homepage"))
+        sm.add_widget(CommunityScreen(name="community"))
         return sm
+
+    def change_screen(self, screen_name):
+        self.root.current = screen_name
 
 if __name__ == "__main__":
     MindfulApp().run()
