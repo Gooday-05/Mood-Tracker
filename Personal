@@ -1,22 +1,21 @@
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.filechooser import FileChooserListView
 from kivy.uix.image import Image
 from kivy.uix.label import Label
 from kivy.uix.button import Button
-from kivy.uix.togglebutton import ToggleButton
+from kivy.uix.popup import Popup
 from kivy.uix.textinput import TextInput
+from kivy.uix.togglebutton import ToggleButton
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.graphics import Color, Rectangle
 from kivy.core.window import Window
 from kivy.clock import Clock
-from kivy.uix.behaviors import FocusBehavior
 
 class MainLayout(BoxLayout):
     def __init__(self, screen_manager, **kwargs):
         super().__init__(**kwargs)
         self.orientation = 'vertical'
-        self.spacing = 10
-        self.padding = 10
         self.screen_manager = screen_manager
         
         Window.size = (300, 500)
@@ -26,144 +25,197 @@ class MainLayout(BoxLayout):
             self.bg_rect = Rectangle(pos=self.pos, size=self.size)
         self.bind(pos=self.update_bg, size=self.update_bg)
         
-        # Top Bar
         top_bar = BoxLayout(orientation='horizontal', size_hint=(1, None), height=100)
-        
-        profile_pic = Image(source="C:\\Users\\admin\\Desktop\\PP.jpg", size_hint=(None, 1), width=50, allow_stretch=True, keep_ratio=True)
-        top_bar.add_widget(profile_pic)
+        self.profile_pic = Image(source="default.jpg", size_hint=(None, 1), width=50)
+        top_bar.add_widget(self.profile_pic)
         
         user_info = BoxLayout(orientation='vertical')
-        username_label = Label(text="User Name", font_size='18sp', halign='left', valign='middle')
-        username_label.bind(size=lambda w, s: setattr(w, 'text_size', s))
-        user_info.add_widget(username_label)
-        friends_label = Label(text="Friends 6", font_size='14sp', halign='left', valign='middle')
-        friends_label.bind(size=lambda w, s: setattr(w, 'text_size', s))
-        user_info.add_widget(friends_label)
+        self.username_label = Label(text="User ID", font_size='18sp')
+        user_info.add_widget(self.username_label)
         top_bar.add_widget(user_info)
         
-        settings_button = Button(text="⚙", size_hint=(None, 1), width=50, font_size='24sp', background_color=(0, 0, 0, 0))
+        settings_button = Button(text="⚙", size_hint=(None, 1), width=50)
         settings_button.bind(on_press=self.go_to_settings)
         top_bar.add_widget(settings_button)
         
         self.add_widget(top_bar)
         
         mid_layout = BoxLayout(orientation='vertical')
-        fire_emoji_label = Label(text="\U0001F525", font_size='40sp', halign='center', valign='middle')
+        fire_emoji_label = Label(text="Streak", font_size='40sp', halign='center', valign='middle')
         mid_layout.add_widget(fire_emoji_label)
         streak_img = Image(source="C:\\Users\\admin\\Desktop\\streak.jpg", size_hint=(1, None), height=100, allow_stretch=True, keep_ratio=True)
         mid_layout.add_widget(streak_img)
-        no_label = Label(text="NO.", font_size='24sp', halign='center', valign='middle')
+        no_label = Label(text="No.", font_size='24sp', halign='center', valign='middle')
         no_label.bind(size=lambda w, s: setattr(w, 'text_size', s))
         mid_layout.add_widget(no_label)
         self.add_widget(mid_layout)
-    
+        
     def update_bg(self, *args):
         self.bg_rect.pos = self.pos
         self.bg_rect.size = self.size
     
     def go_to_settings(self, instance):
         self.screen_manager.current = "settings"
+    
+    def update_profile(self, user_id, profile_pic):
+        self.username_label.text = user_id if user_id else "User ID"
+        if profile_pic:
+            self.profile_pic.source = profile_pic
 
 class SettingsScreen(BoxLayout):
-    def __init__(self, screen_manager, **kwargs):
+    def __init__(self, screen_manager, main_layout, **kwargs):
         super().__init__(**kwargs)
         self.orientation = 'vertical'
-        self.spacing = 10
-        self.padding = 10
         self.screen_manager = screen_manager
-
+        self.main_layout = main_layout
+        
         back_button = Button(text="Back", size_hint=(None, None), size=(100, 50))
         back_button.bind(on_press=self.go_back)
         self.add_widget(back_button)
-
+        
         settings_label = Label(text="Settings Page", font_size='24sp')
         self.add_widget(settings_label)
+        
+        profile_button = Button(text="Profile Settings")
+        profile_button.bind(on_press=self.open_profile_popup)
+        self.add_widget(profile_button)
+        
+        self.login_button = Button(text="Login")  # Fixed: self.login_button is now properly defined
+        self.logout_button = Button(text="Logout")
 
-        # Login/Logout Tab
-        tab_layout = BoxLayout(orientation='horizontal', size_hint=(1, None), height=50)
-        self.login_button = Button(text="Login", size_hint=(0.5, 1))
-        self.logout_button = Button(text="Logout", size_hint=(0.5, 1))
-
-        self.login_button.bind(on_press=self.show_login_form)
+        self.login_button.bind(on_press=self.open_login_popup)
         self.logout_button.bind(on_press=self.logout_user)
 
-        tab_layout.add_widget(self.login_button)
+        tab_layout = BoxLayout()
+        tab_layout.add_widget(self.login_button)  # Fixed: Now correctly referencing self.login_button
         tab_layout.add_widget(self.logout_button)
         self.add_widget(tab_layout)
-
-        # Login Form (Initially NOT added)
+        
+        self.login_message = Label(text="", size_hint=(1, None), height=30)
+        self.add_widget(self.login_message)
+         
+        # Notifications Toggle
+        notifications_layout = BoxLayout(orientation='horizontal', size_hint=(1, None), height=50)
+        notifications_label = Label(text="Notifications", size_hint=(0.5, 1))
+        self.notifications_switch = ToggleButton(text="OFF", size_hint=(0.5, 1))
+        notifications_layout.add_widget(notifications_label)
+        notifications_layout.add_widget(self.notifications_switch)
+        self.notifications_switch.bind(on_press=self.on_toggle_notifications)
+        self.add_widget(notifications_layout)
+    
+    def open_profile_popup(self, instance):
+        popup_content = ProfilePopup(self)
+        self.popup = Popup(title="Profile Settings", content=popup_content, size_hint=(0.8, 0.5))
+        self.popup.open()
+        
+    def open_login_popup(self, instance):
         self.login_layout = BoxLayout(orientation='vertical')
-        self.email_input = TextInput(hint_text="Email / Mobile No.", size_hint=(1, None), height=40)
-        self.password_input = TextInput(hint_text="Password", password=True, size_hint=(1, None), height=40)
-        self.password_input.bind(on_text_validate=self.login_user)
-        self.submit_button = Button(text="Submit", size_hint=(1, None), height=40)
-        self.submit_button.bind(on_press=self.login_user)
-
+        self.email_input = TextInput(hint_text="Email")
+        self.password_input = TextInput(hint_text="Password", password=True)
+        self.submit_button = Button(text="Submit")
+        
         self.login_layout.add_widget(self.email_input)
         self.login_layout.add_widget(self.password_input)
         self.login_layout.add_widget(self.submit_button)
-
-        # Message label
-        self.login_message = Label(text="", font_size='16sp', color=(0, 1, 0, 1))
-        self.add_widget(self.login_message)
-
-        # Notifications Tab
-        notifications_layout = BoxLayout(orientation='horizontal', size_hint=(1, None), height=50)
-        notifications_label = Label(text="Notifications", size_hint=(0.5, 1))
-        self.notifications_switch = ToggleButton(text="OFF", size_hint=(0.5, 1))  # Use ToggleButton
-        notifications_layout.add_widget(notifications_label)
-        notifications_layout.add_widget(self.notifications_switch)
-        self.add_widget(notifications_layout)
-        self.notifications_switch.bind(on_press=self.on_toggle_notifications) # Corrected bind to on_press
-
-    def show_login_form(self, instance):
-        """ Dynamically add the login form """
-        if self.login_layout not in self.children:
-            self.add_widget(self.login_layout, index=2)  # Add above the notifications tab
-
-    def login_user(self, instance=None):
+        
+        self.login_popup = Popup(title="Login", content=self.login_layout, size_hint=(0.8, 0.5))
+        self.submit_button.bind(on_press=lambda x: self.close_login_popup())
+        self.login_popup.open()
+        self.submit_button.bind(on_press=self.login_user)
+        self.login_popup.open()
+        
+    def login_user(self, instance):
         email = self.email_input.text
-        if "@" in email:
-            username = email.split("@")[0]
-        else:
-            username = email
+        username = email.split("@")[0] if "@" in email else email
 
         self.login_message.text = f"Logged in successfully, welcome {username}!"
-        Clock.schedule_once(self.clear_login_message, 2)
+        self.login_message.color = (0, 1, 0, 1)  # Green color for success
 
+        self.login_popup.dismiss()
+
+        Clock.schedule_once(self.clear_login_message, 2)
+    
     def clear_login_message(self, dt):
-        """ Remove the login form and clear message """
-        if self.login_layout in self.children:
-            self.remove_widget(self.login_layout)
-        self.login_message.text = ""
-
+        self.remove_widget(self.login_message)
+        
     def logout_user(self, instance):
-        """ Logout and remove login form if open """
-        self.email_input.text = ""
-        self.password_input.text = ""
-        self.login_message.text = "Logout successful!"
+        self.login_message = Label(text="Logged out successfully!")
+        self.add_widget(self.login_message)
         Clock.schedule_once(self.clear_login_message, 2)
-
+    
+    def clear_login_message(self, dt):
+        self.remove_widget(self.login_message)
+        
     def on_toggle_notifications(self, instance):
-        if instance.state == "down":
-            instance.text = "ON"
-            print("Notifications Turned ON")
-        else:
-            instance.text = "OFF"
-            print("Notifications Turned OFF")
+        instance.text = "ON" if instance.state == "down" else "OFF"
+        print(f"Notifications Turned {instance.text}")
+        
+    def close_login_popup(self):
+        self.login_popup.dismiss()
+        self.screen_manager.current = "settings"
+    
+    def update_main_screen(self, user_id, profile_pic):
+        self.main_layout.update_profile(user_id, profile_pic)
 
+    
     def go_back(self, instance):
         self.screen_manager.current = "main"
+
+class ProfilePopup(BoxLayout):
+    def __init__(self, settings_screen, **kwargs):
+        super().__init__(**kwargs)
+        self.orientation = 'vertical'
+        self.settings_screen = settings_screen
+        
+        self.profile_pic = Image(source="default.jpg", size_hint=(None, None), size=(100, 100))
+        self.add_widget(self.profile_pic)
+        
+        self.choose_pic_button = Button(text="Choose Profile Picture")
+        self.choose_pic_button.bind(on_press=self.open_file_chooser)
+        self.add_widget(self.choose_pic_button)
+        
+        self.user_id_input = TextInput(hint_text="Enter User ID")
+        self.add_widget(self.user_id_input)
+        
+        self.save_button = Button(text="Save")
+        self.save_button.bind(on_press=self.save_profile)
+        self.add_widget(self.save_button)
+    
+    def open_file_chooser(self, instance):
+        file_popup_layout = BoxLayout(orientation='vertical')
+        self.file_chooser = FileChooserListView()
+        select_button = Button(text="Select", size_hint=(1, None), height=50)
+        
+        def select_file(instance):
+            if self.file_chooser.selection:
+                self.profile_pic.source = self.file_chooser.selection[0]
+                self.file_popup.dismiss()
+        
+        select_button.bind(on_press=select_file)
+        file_popup_layout.add_widget(self.file_chooser)
+        file_popup_layout.add_widget(select_button)
+        
+        self.file_popup = Popup(title="Select Profile Picture", content=file_popup_layout, size_hint=(0.9, 0.9))
+        self.file_popup.open()
+    
+    def save_profile(self, instance):
+        self.settings_screen.main_layout.update_profile(self.user_id_input.text, self.profile_pic.source)
+        self.settings_screen.popup.dismiss()
 
 class MyApp(App):
     def build(self):
         sm = ScreenManager()
+        main_layout = MainLayout(sm)
+
+        # Fix: Creating screens properly
         main_screen = Screen(name="main")
-        main_screen.add_widget(MainLayout(sm))
-        settings_screen = Screen(name="settings")
-        settings_screen.add_widget(SettingsScreen(sm))
+        main_screen.add_widget(main_layout)
         sm.add_widget(main_screen)
+
+        settings_screen = Screen(name="settings")
+        settings_screen.add_widget(SettingsScreen(sm, main_layout))
         sm.add_widget(settings_screen)
+
         return sm
 
 if __name__ == '__main__':
