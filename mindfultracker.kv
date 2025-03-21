@@ -1,7 +1,7 @@
 <StartScreen>:
     canvas.before:
         Color:
-            rgba: 0.96, 0.92, 0.88, 1  # Light beige background
+            rgba: 0.96, 0.92, 0.88, 1
         Rectangle:
             pos: self.pos
             size: self.size
@@ -9,7 +9,7 @@
     Label:
         text: "Mental Health Check-In"
         font_size: 24
-        color: 0, 0, 0, 1  # Black text for visibility
+        color: 0, 0, 0, 1
         pos_hint: {"center_x": 0.5, "center_y": 0.8}
 
     BoxLayout:
@@ -22,21 +22,21 @@
         Button:
             text: "Take Questionnaire"
             font_size: 16
-            background_color: 0.2, 0.2, 0.2, 1  # Dark gray for contrast
-            color: 1, 1, 1, 1  # White text for visibility
-            on_press: app.root.current = "homepage"
+            background_color: 0.2, 0.2, 0.2, 1
+            color: 1, 1, 1, 1
+            on_press: app.change_screen("homepage")
 
         Button:
             text: "Login Directly"
             font_size: 16
             background_color: 0.2, 0.2, 0.2, 1
             color: 1, 1, 1, 1
-            on_press: app.root.current = "homepage"
+            on_press: app.change_screen("homepage")
 
 <HomePageScreen>:
     canvas.before:
         Color:
-            rgba: 0.96, 0.92, 0.88, 1  # Light beige background
+            rgba: 0.96, 0.92, 0.88, 1
         Rectangle:
             pos: self.pos
             size: self.size
@@ -95,27 +95,90 @@
                 size_hint: 0.3, 0.8
                 on_press: root.log_mood("Happy")
 
-        BoxLayout:
+        MDBoxLayout:
+            size_hint_y: 0.1
+            padding: [20, 10]
+            spacing: 40
+            md_bg_color: 0.96, 0.92, 0.88, 1
+
+            MDIconButton:
+                icon: "home"
+                on_release: app.change_screen("homepage")
+
+            MDIconButton:
+                icon: "chat"
+                on_release: app.change_screen("community")
+
+            MDIconButton:
+                icon: "chart-bar"
+                on_release: app.change_screen("analytics")
+
+            MDIconButton:
+                icon: "account"
+                on_release: app.change_screen("profile")
+
+<CommunityScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        canvas.before:
+            Color:
+                rgba: 0.94, 0.91, 0.85, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        MDBoxLayout:
             size_hint_y: 0.1
             padding: 10
-            spacing: 20
+            MDLabel:
+                text: "Community Chat"
+                font_style: "H5"
+                halign: "center"
 
-            Button:
-                text: "🏠"
-                font_size: 30
-                size_hint_x: 0.25
+        MDBoxLayout:
+            size_hint_y: 0.2
+            padding: 10
+            spacing: 10
 
-            Button:
-                text: "💬"
-                font_size: 30
-                size_hint_x: 0.25
+        MDBoxLayout:
+            size_hint_y: 0.1
+            padding: 10
+            spacing: 10
 
-            Button:
-                text: "📊"
-                font_size: 30
-                size_hint_x: 0.25
+            MDBoxLayout:
+                size_hint_x: 0.85
+                radius: [25, 25, 25, 25]
+                MDTextField:
+                    id: message_input
+                    hint_text: "How are you feeling?"
+                    mode: "rectangle"
+                    font_size: 18
+                    hint_text_color: 0.6, 0.6, 0.6, 1
 
-            Button:
-                text: "👤"
-                font_size: 30
-                size_hint_x: 0.25
+            MDIconButton:
+                size_hint_x: 0.15
+                md_bg_color: 0.8, 1, 0.8, 1
+                icon: "arrow-up-bold-circle"
+                on_release: root.send_message()
+
+        MDBoxLayout:
+            size_hint_y: 0.1
+            padding: [20, 10]
+            spacing: 40
+            md_bg_color: 0.96, 0.92, 0.88, 1
+
+            MDIconButton:
+                icon: "home"
+                on_release: app.change_screen("homepage")
+
+            MDIconButton:
+                icon: "chat"
+                on_release: app.change_screen("community")
+
+            MDIconButton:
+                icon: "chart-bar"
+                on_release: app.change_screen("analytics")
+
+            MDIconButton:
+                icon: "account"
+                on_release: app.change_screen("profile")
