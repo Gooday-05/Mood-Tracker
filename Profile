@@ -26,7 +26,7 @@ class MainLayout(BoxLayout):
         self.bind(pos=self.update_bg, size=self.update_bg)
         
         top_bar = BoxLayout(orientation='horizontal', size_hint=(1, None), height=100)
-        self.profile_pic = Image(source="default.jpg", size_hint=(None, 1), width=50)
+        self.profile_pic = Image(source="C:\\Users\\mmcoe\\Desktop\\New folder\\profileimg.png", size_hint=(None, 1), width=50)
         top_bar.add_widget(self.profile_pic)
         
         user_info = BoxLayout(orientation='vertical')
@@ -34,20 +34,17 @@ class MainLayout(BoxLayout):
         user_info.add_widget(self.username_label)
         top_bar.add_widget(user_info)
         
-        settings_button = Button(text="⚙", size_hint=(None, 1), width=50)
+        settings_button = Button(size_hint=(None, None), size=(75,75), background_normal="C:\\Users\\mmcoe\\Desktop\\New folder\\settings.webp")
         settings_button.bind(on_press=self.go_to_settings)
         top_bar.add_widget(settings_button)
         
         self.add_widget(top_bar)
         
         mid_layout = BoxLayout(orientation='vertical')
-        fire_emoji_label = Label(text="Streak", font_size='40sp', halign='center', valign='middle')
+        fire_emoji_label = Label(text="Streak", font_size='35sp', halign='left')
         mid_layout.add_widget(fire_emoji_label)
-        streak_img = Image(source="C:\\Users\\admin\\Desktop\\streak.jpg", size_hint=(1, None), height=100, allow_stretch=True, keep_ratio=True)
+        streak_img = Image(source="C:\\Users\\mmcoe\\Desktop\\New folder\\streakimg.png", size_hint=(None, None), size=(80,80), allow_stretch=True, keep_ratio=True)
         mid_layout.add_widget(streak_img)
-        no_label = Label(text="No.", font_size='24sp', halign='center', valign='middle')
-        no_label.bind(size=lambda w, s: setattr(w, 'text_size', s))
-        mid_layout.add_widget(no_label)
         self.add_widget(mid_layout)
         
     def update_bg(self, *args):
