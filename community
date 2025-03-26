@@ -15,7 +15,7 @@ BoxLayout:
     orientation: "vertical"
     canvas.before:
         Color:
-            rgba: 0.94, 0.91, 0.85, 1  # Updated background color
+            rgba: 0.94, 0.91, 0.85, 1
         Rectangle:
             pos: self.pos
             size: self.size
@@ -33,7 +33,10 @@ BoxLayout:
             text: "Community"
             font_style: "H5"
             halign: "center"
-    
+        MDIconButton:
+            icon: "account-plus"
+            on_release: app.show_add_friend_dialog()
+
     IconGrid:
         size_hint_y: 0.3
 
@@ -55,13 +58,13 @@ BoxLayout:
                 hint_text: "How are you feeling?"
                 mode: "rectangle"
                 size_hint_x: 0.9
-                background_color: 0, 0, 0, 0  # Transparent background
+                background_color: 0, 0, 0, 0
                 font_size: 18
                 hint_text_color: 0.6, 0.6, 0.6, 1
 
         MDIconButton:
             size_hint_x: 0.15
-            md_bg_color: 0.8, 1, 0.8, 1  # Light green color
+            md_bg_color: 0.8, 1, 0.8, 1
             icon: "arrow-up-bold-circle"
             font_size: 24
             on_release: app.send_message()
@@ -86,7 +89,6 @@ BoxLayout:
 """
 
 class CustomIcon(ButtonBehavior, Widget):
-    """Clickable chat bubble that opens user info popup"""
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.bind(pos=self.update_graphics, size=self.update_graphics)
@@ -104,7 +106,6 @@ class CustomIcon(ButtonBehavior, Widget):
         self.show_user_info()
 
     def show_user_info(self):
-        """Displays user information in a popup dialog."""
         user_info_layout = MDBoxLayout(orientation="vertical", spacing=10, padding=20)
         close_button = MDRaisedButton(text="Close", on_release=lambda x: self.dialog.dismiss())
 
@@ -117,7 +118,6 @@ class CustomIcon(ButtonBehavior, Widget):
         self.dialog.open()
 
 class IconGrid(MDGridLayout):
-    """Grid layout containing the clickable custom icons"""
     def __init__(self, **kwargs):
         super().__init__(cols=3, rows=2, **kwargs)
         for _ in range(6):
@@ -130,11 +130,30 @@ class KivyAndroidApp(MDApp):
     def send_message(self):
         message = self.root.ids.message_input.text
         if message.strip():
-            print(f"User: {message}")  # Simulating a chat message being sent
-            self.root.ids.message_input.text = ""  # Clear input field after sending
+            print(f"User: {message}")
+            self.root.ids.message_input.text = ""
 
     def change_screen(self, screen_name):
-        print(f"Switching to {screen_name} screen")  # Placeholder for screen navigation logic
+        print(f"Switching to {screen_name} screen")
+
+    def show_add_friend_dialog(self):
+        self.friend_input = MDTextField(hint_text="Enter friend's name")
+        add_button = MDRaisedButton(text="Add", on_release=self.add_friend)
+        close_button = MDRaisedButton(text="Close", on_release=lambda x: self.dialog.dismiss())
+
+        self.dialog = MDDialog(
+            title="Add Friend",
+            type="custom",
+            content_cls=self.friend_input,
+            buttons=[add_button, close_button],
+        )
+        self.dialog.open()
+
+    def add_friend(self, instance):
+        friend_name = self.friend_input.text.strip()
+        if friend_name:
+            print(f"Added friend: {friend_name}")
+            self.dialog.dismiss()
 
 if __name__ == "__main__":
     KivyAndroidApp().run()
