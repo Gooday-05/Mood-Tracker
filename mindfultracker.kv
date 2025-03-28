@@ -74,26 +74,45 @@
 
         BoxLayout:
             size_hint_y: 0.15
-            spacing: 10
-            padding: 20
+            orientation: 'vertical'
+            padding: 10
 
-            Button:
-                text: "😢"
-                font_size: 40
-                size_hint: 0.3, 0.8
-                on_press: root.log_mood("Sad")
+            Label:
+                text: "Select your mood"
+                font_size: 16
+                color: 0, 0, 0, 1
+                halign: 'center'
 
-            Button:
-                text: "😐"
-                font_size: 40
-                size_hint: 0.3, 0.8
-                on_press: root.log_mood("Neutral")
+            Slider:
+                id: mood_slider
+                min: 0
+                max: 100
+                value: 50
+                step: 1
 
-            Button:
-                text: "😊"
-                font_size: 40
-                size_hint: 0.3, 0.8
-                on_press: root.log_mood("Happy")
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_y: None
+                height: 30
+                padding: [10, 0]
+                spacing: 20
+
+                Label:
+                    text: "Happy"
+                    font_size: 14
+                    color: 0, 0, 0, 1
+                
+                Label:
+                    text: "Neutral"
+                    font_size: 14
+                    color: 0, 0, 0, 1
+                    halign: 'center'
+                
+                Label:
+                    text: "Angry/Sad"
+                    font_size: 14
+                    color: 0, 0, 0, 1
+                    halign: 'right'
 
         MDBoxLayout:
             size_hint_y: 0.1
