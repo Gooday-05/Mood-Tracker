@@ -73,7 +73,7 @@
                 color: 0, 0, 0, 1
 
         BoxLayout:
-            size_hint_y: 0.2
+            size_hint_y: 0.15
             orientation: 'vertical'
             padding: 10
 
@@ -86,8 +86,8 @@
             Slider:
                 id: mood_slider
                 min: 0
-                max: 4
-                value: 2
+                max: 100
+                value: 50
                 step: 1
 
             BoxLayout:
@@ -95,15 +95,10 @@
                 size_hint_y: None
                 height: 30
                 padding: [10, 0]
-                spacing: 15
+                spacing: 20
 
                 Label:
-                    text: "Sad"
-                    font_size: 14
-                    color: 0, 0, 0, 1
-                
-                Label:
-                    text: "Stressed"
+                    text: "Happy"
                     font_size: 14
                     color: 0, 0, 0, 1
                 
@@ -111,23 +106,13 @@
                     text: "Neutral"
                     font_size: 14
                     color: 0, 0, 0, 1
+                    halign: 'center'
                 
                 Label:
-                    text: "Good"
+                    text: "Angry/Sad"
                     font_size: 14
                     color: 0, 0, 0, 1
-                
-                Label:
-                    text: "Jolly"
-                    font_size: 14
-                    color: 0, 0, 0, 1
-
-            Button:
-                text: "Enter"
-                size_hint_y: None
-                height: dp(40)
-                pos_hint: {"center_x": 0.5}
-                on_press: root.log_mood()
+                    halign: 'right'
 
         MDBoxLayout:
             size_hint_y: 0.1
@@ -150,3 +135,140 @@
             MDIconButton:
                 icon: "account"
                 on_release: app.change_screen("profile")
+
+<CommunityScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        canvas.before:
+            Color:
+                rgba: 0.94, 0.91, 0.85, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        MDBoxLayout:
+            size_hint_y: 0.1
+            padding: 10
+            MDLabel:
+                text: "Community Chat"
+                font_style: "H5"
+                halign: "center"
+
+        MDBoxLayout:
+            size_hint_y: 0.2
+            padding: 10
+            spacing: 10
+
+        MDBoxLayout:
+            size_hint_y: 0.1
+            padding: 10
+            spacing: 10
+
+            MDBoxLayout:
+                size_hint_x: 0.85
+                radius: [25, 25, 25, 25]
+                MDTextField:
+                    id: message_input
+                    hint_text: "How are you feeling?"
+                    mode: "rectangle"
+                    font_size: 18
+                    hint_text_color: 0.6, 0.6, 0.6, 1
+
+            MDIconButton:
+                size_hint_x: 0.15
+                md_bg_color: 0.8, 1, 0.8, 1
+                icon: "arrow-up-bold-circle"
+                on_release: root.send_message()
+
+        MDBoxLayout:
+            size_hint_y: 0.1
+            padding: [20, 10]
+            spacing: 40
+            md_bg_color: 0.96, 0.92, 0.88, 1
+
+            MDIconButton:
+                icon: "home"
+                on_release: app.change_screen("homepage")
+
+            MDIconButton:
+                icon: "chat"
+                on_release: app.change_screen("community")
+
+            MDIconButton:
+                icon: "chart-bar"
+                on_release: app.change_screen("analytics")
+
+            MDIconButton:
+                icon: "account"
+                on_release: app.change_screen("profile")
+<QuestionnaireScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20
+        spacing: 10
+
+        Label:
+            text: "How do you feel today?"
+            font_size: 22
+            color: 0, 0, 0, 1
+            halign: "center"
+
+        BoxLayout:
+            orientation: 'vertical'
+            spacing: 15
+
+            Label:
+                text: "1. How was your sleep?"
+            Slider:
+                id: q1
+                min: 1
+                max: 5
+                value: 3
+                step: 1
+
+            Label:
+                text: "2. How is your energy level?"
+            Slider:
+                id: q2
+                min: 1
+                max: 5
+                value: 3
+                step: 1
+
+            Label:
+                text: "3. How is your focus today?"
+            Slider:
+                id: q3
+                min: 1
+                max: 5
+                value: 3
+                step: 1
+
+            Label:
+                text: "4. How social do you feel?"
+            Slider:
+                id: q4
+                min: 1
+                max: 5
+                value: 3
+                step: 1
+
+            Label:
+                text: "5. How anxious or stressed are you?"
+            Slider:
+                id: q5
+                min: 1
+                max: 5
+                value: 3
+                step: 1
+
+        Button:
+            text: "Submit"
+            on_press: root.submit_responses()
+
+        Label:
+            id: result_label
+            text: ""
+            font_size: 18
+            color: 0, 0, 0, 1
+            halign: "center"
