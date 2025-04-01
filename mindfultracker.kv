@@ -1,3 +1,13 @@
+ScreenManager:
+    StartScreen:
+        name: "start"
+    HomePageScreen:
+        name: "homepage"
+    CommunityScreen:
+        name: "community"
+    QuestionnaireScreen:
+        name: "questionnaire"
+
 <StartScreen>:
     canvas.before:
         Color:
@@ -24,7 +34,7 @@
             font_size: 16
             background_color: 0.2, 0.2, 0.2, 1
             color: 1, 1, 1, 1
-            on_press: app.change_screen("homepage")
+            on_press: app.change_screen("questionnaire")
 
         Button:
             text: "Login Directly"
@@ -224,20 +234,28 @@
     BoxLayout:
         orientation: 'vertical'
         padding: 20
-        spacing: 10
+        spacing: 15  # Reduce the overall spacing between components
 
         Label:
             text: "How do you feel today?"
             font_size: 22
-            color: 0, 0, 0, 1
+            color: 1, 0, 0, 1
             halign: "center"
+            size_hint_y: None
+            height: dp(40)  # Fixed height for the title
 
+        # Question 1: How was your sleep?
         BoxLayout:
             orientation: 'vertical'
-            spacing: 15
+            size_hint_y: None
+            height: dp(80)  # Reduced height for each question block
+            spacing: 8  # Reduced spacing between label and slider
 
             Label:
                 text: "1. How was your sleep?"
+                font_size: 16
+                color: 1, 0, 0, 1
+                halign: "center"
             Slider:
                 id: q1
                 min: 1
@@ -245,8 +263,18 @@
                 value: 3
                 step: 1
 
+        # Question 2: How is your energy level?
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: None
+            height: dp(80)  # Same reduced height
+            spacing: 8
+
             Label:
                 text: "2. How is your energy level?"
+                font_size: 16
+                color: 1, 0, 0, 1
+                halign: "center"
             Slider:
                 id: q2
                 min: 1
@@ -254,8 +282,18 @@
                 value: 3
                 step: 1
 
+        # Question 3: How is your focus today?
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: None
+            height: dp(80)  # Same reduced height
+            spacing: 8
+
             Label:
                 text: "3. How is your focus today?"
+                font_size: 16
+                color: 1, 0, 0, 1
+                halign: "center"
             Slider:
                 id: q3
                 min: 1
@@ -263,8 +301,18 @@
                 value: 3
                 step: 1
 
+        # Question 4: How social do you feel?
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: None
+            height: dp(80)  # Same reduced height
+            spacing: 8
+
             Label:
                 text: "4. How social do you feel?"
+                font_size: 16
+                color: 1, 0, 0, 1
+                halign: "center"
             Slider:
                 id: q4
                 min: 1
@@ -272,8 +320,18 @@
                 value: 3
                 step: 1
 
+        # Question 5: How anxious or stressed are you?
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: None
+            height: dp(80)  # Same reduced height
+            spacing: 8
+
             Label:
                 text: "5. How anxious or stressed are you?"
+                font_size: 16
+                color: 1, 0, 0, 1
+                halign: "center"
             Slider:
                 id: q5
                 min: 1
@@ -281,13 +339,19 @@
                 value: 3
                 step: 1
 
+        # Submit Button
         Button:
             text: "Submit"
+            size_hint_y: None
+            height: dp(50)  # Reduced height for the button
             on_press: root.submit_responses()
 
+        # Result Label
         Label:
             id: result_label
             text: ""
             font_size: 18
             color: 0, 0, 0, 1
             halign: "center"
+            size_hint_y: None
+            height: dp(30)  # Reduced height for the result label
