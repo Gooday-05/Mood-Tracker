@@ -4,6 +4,7 @@ from kivy.lang import Builder
 from kivy.core.window import Window
 from kivy.metrics import dp
 import sqlite3
+from kivy.clock import Clock
 
 Window.size = (dp(360), dp(640))
 Window.softinput_mode = "below_target"
@@ -12,7 +13,51 @@ class StartScreen(Screen):
     pass  
 
 class HomePageScreen(Screen):
-    pass  
+    mood_mapping = {
+        "Sad": 0,
+        "Stressed": 1,
+        "Neutral": 2,
+        "Good": 3,
+        "Jolly": 4
+    }
+
+    def on_enter(self):
+        """Fetch and update the mood slider when entering the home page."""
+        try:
+            conn = sqlite3.connect("mood_data.db")
+            cursor = conn.cursor()
+            cursor.execute("SELECT mood FROM moods ORDER BY id DESC LIMIT 1")
+            result = cursor.fetchone()
+        except sqlite3.Error as e:
+            print("Database error:", e)
+            result = None
+        finally:
+            conn.close()
+
+        if result:
+            self.set_mood(result[0])
+
+    def set_mood(self, mood):
+        """Update the slider based on the stored mood."""
+        mood_slider = self.ids.mood_slider
+        if mood in self.mood_mapping:
+            mood_slider.value = self.mood_mapping[mood]
+
+    def store_manual_mood(self):
+        """Save mood manually from slider."""
+        mood_slider = self.ids.mood_slider
+        reverse_mood_mapping = {v: k for k, v in self.mood_mapping.items()}
+        mood = reverse_mood_mapping.get(int(mood_slider.value), "Neutral")
+
+        try:
+            conn = sqlite3.connect("mood_data.db")
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO moods (score, mood) VALUES (?, ?)", (0, mood))
+            conn.commit()
+        except sqlite3.Error as e:
+            print("Database error:", e)
+        finally:
+            conn.close()
 
 class CommunityScreen(Screen):
     pass  
@@ -30,26 +75,38 @@ class QuestionnaireScreen(Screen):
         total_score = sum(responses)
         mood = self.analyze_mood(total_score)
 
-        # Store in SQLite
-        conn = sqlite3.connect("mood_data.db")
-        cursor = conn.cursor()
-        cursor.execute("INSERT INTO moods (score, mood) VALUES (?, ?)", (total_score, mood))
-        conn.commit()
-        conn.close()
+        try:
+            conn = sqlite3.connect("mood_data.db")
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO moods (score, mood) VALUES (?, ?)", (total_score, mood))
+            conn.commit()
+        except sqlite3.Error as e:
+            print("Database error:", e)
+        finally:
+            conn.close()
 
+        # Show the mood result
         self.ids.result_label.text = f"Your mood is: {mood}"
-    
+
+        # Update mood in homepage and transition smoothly
+        self.manager.get_screen("homepage").set_mood(mood)
+        Clock.schedule_once(lambda dt: self.transition_to_home(), 2)  # Wait 2 seconds before switching
+
     def analyze_mood(self, score):
         if score <= 7:
-            return "Very Low Mood"
+            return "Sad"
         elif score <= 13:
-            return "Low Mood"
+            return "Stressed"
         elif score <= 17:
             return "Neutral"
         elif score <= 21:
-            return "Good Mood"
+            return "Good"
         else:
-            return "Very Happy Mood"
+            return "Jolly"
+
+    def transition_to_home(self):
+        """Smoothly transition to the home page."""
+        self.manager.current = "homepage"
 
 class MindfulApp(MDApp):
     def build(self):
@@ -66,17 +123,21 @@ class MindfulApp(MDApp):
         self.root.current = screen_name
 
     def init_db(self):
-        conn = sqlite3.connect("mood_data.db")
-        cursor = conn.cursor()
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS moods (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                score INTEGER,
-                mood TEXT
-            )
-        """)
-        conn.commit()
-        conn.close()
+        try:
+            conn = sqlite3.connect("mood_data.db")
+            cursor = conn.cursor()
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS moods (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    score INTEGER,
+                    mood TEXT
+                )
+            """)
+            conn.commit()
+        except sqlite3.Error as e:
+            print("Database error:", e)
+        finally:
+            conn.close()
 
 if __name__ == "__main__":
     MindfulApp().run()
