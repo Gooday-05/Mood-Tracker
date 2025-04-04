@@ -47,8 +47,8 @@ class RegisterScreen(Screen):
 
 class LoginScreen(Screen):
     def login_user(self):
-        email = self.ids.email.text.strip()
-        password = self.ids.password.text.strip()
+        email = self.ids.login_email.text.strip()
+        password = self.ids.login_password.text.strip()
 
         if not email or not password:
             self.ids.error_label.text = "Fields cannot be empty!"
@@ -63,9 +63,11 @@ class LoginScreen(Screen):
         conn.close()
 
         if user:
-            self.manager.get_screen("homepage").user_id = user[0]
-            self.manager.get_screen("homepage").user_name = user[1]  # Store user name
-            self.manager.current = "homepage"
+            home_screen = self.manager.get_screen("homepage")
+            home_screen.user_id = user[0]
+            home_screen.user_name = user[1]
+            home_screen.update_welcome_message()  # ✅ Updating label
+            self.manager.current = "start"
         else:
             self.ids.error_label.text = "Invalid email or password!"
 
@@ -82,6 +84,8 @@ class HomePageScreen(Screen):
         "Jolly": 4
     }
 
+    reverse_mood_mapping = {v: k for k, v in mood_mapping.items()}
+
     def on_enter(self):
         if self.user_id:
             conn = sqlite3.connect("mood_data.db")
@@ -92,7 +96,55 @@ class HomePageScreen(Screen):
 
             if result:
                 self.set_mood(result[0])
-        self.ids.welcome_label.text = f"Welcome, {self.user_name}!"
+        self.ids.greeting_label.text = f"Welcome, {self.user_name}!"
+
+    def set_mood(self, mood):
+        mood_slider = self.ids.mood_slider
+        if mood in self.mood_mapping:
+            mood_slider.value = self.mood_mapping[mood]
+            self.update_mood_label(self.mood_mapping[mood])
+
+    def update_mood_label(self, value):
+        mood = self.reverse_mood_mapping.get(int(value), "Neutral")
+        self.ids.affirmation_label.text = f"Current mood: {mood}"
+
+    def store_manual_mood(self):
+        mood_value = int(self.ids.mood_slider.value)
+        mood = self.reverse_mood_mapping[mood_value]
+
+        conn = sqlite3.connect("mood_data.db")
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO moods (user_id, score, mood) VALUES (?, ?, ?)",
+                       (self.user_id, mood_value * 5, mood))  # *5 just to mimic the questionnaire scale
+        conn.commit()
+        conn.close()
+
+        self.ids.affirmation_label.text = f"Saved mood: {mood}"
+
+
+
+    mood_mapping = {
+        "Sad": 0,
+        "Stressed": 1,
+        "Neutral": 2,
+        "Good": 3,
+        "Jolly": 4
+    }
+
+    def on_enter(self):
+        self.update_welcome_message()
+        if self.user_id:
+            conn = sqlite3.connect("mood_data.db")
+            cursor = conn.cursor()
+            cursor.execute("SELECT mood FROM moods WHERE user_id=? ORDER BY id DESC LIMIT 1", (self.user_id,))
+            result = cursor.fetchone()
+            conn.close()
+
+            if result:
+                self.set_mood(result[0])
+
+    def update_welcome_message(self):
+        self.ids.greeting_label.text = f"Welcome, {self.user_name}!"  # ✅ Fixed label update
 
     def set_mood(self, mood):
         mood_slider = self.ids.mood_slider
@@ -154,29 +206,6 @@ class MindfulApp(MDApp):
 
     def change_screen(self, screen_name):
         self.sm.current = screen_name
-
-    def init_db(self):
-        conn = sqlite3.connect("mood_data.db")
-        cursor = conn.cursor()
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT,
-                email TEXT UNIQUE,
-                password TEXT
-            )
-        """)
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS moods (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER,
-                score INTEGER,
-                mood TEXT,
-                FOREIGN KEY (user_id) REFERENCES users(id)
-            )
-        """)
-        conn.commit()
-        conn.close()
 
     def init_db(self):
         conn = sqlite3.connect("mood_data.db")
