@@ -7,6 +7,10 @@ ScreenManager:
         name: "community"
     QuestionnaireScreen:
         name: "questionnaire"
+    LoginScreen:
+        name: "login"
+    RegisterScreen:
+        name: "register"
 
 <StartScreen>:
     canvas.before:
@@ -41,7 +45,7 @@ ScreenManager:
             font_size: 16
             background_color: 0.2, 0.2, 0.2, 1
             color: 1, 1, 1, 1
-            on_press: app.change_screen("homepage")
+            on_press: app.change_screen("login")
 
 <HomePageScreen>:
     canvas.before:
@@ -53,7 +57,6 @@ ScreenManager:
 
     BoxLayout:
         orientation: 'vertical'
-        size_hint: 1, 1
 
         BoxLayout:
             size_hint_y: 0.15
@@ -99,41 +102,7 @@ ScreenManager:
                 max: 4
                 value: 2
                 step: 1
-
-            BoxLayout:
-                orientation: 'horizontal'
-                size_hint_y: None
-                height: 30
-                padding: [10, 0]
-                spacing: 20
-
-                Label:
-                    text: "Sad"
-                    font_size: 14
-                    color: 0, 0, 0, 1
-                
-                Label:
-                    text: "Stressed"
-                    font_size: 14
-                    color: 0, 0, 0, 1
-                    halign: 'center'
-                
-                Label:
-                    text: "Neutral"
-                    font_size: 14
-                    color: 0, 0, 0, 1
-                    halign: 'center'
-
-                Label:
-                    text: "Good"
-                    font_size: 14
-                    color: 0, 0, 0, 1
-
-                Label:
-                    text: "Jolly"
-                    font_size: 14
-                    color: 0, 0, 0, 1
-                    halign: 'right'
+                on_value: root.update_mood_label(self.value)
 
             Button:
                 text: "Enter"
@@ -164,194 +133,204 @@ ScreenManager:
                 icon: "account"
                 on_release: app.change_screen("profile")
 
-<CommunityScreen>:
+<LoginScreen>:
     BoxLayout:
         orientation: "vertical"
-        canvas.before:
-            Color:
-                rgba: 0.94, 0.91, 0.85, 1
-            Rectangle:
-                pos: self.pos
-                size: self.size
+        padding: 20
+        spacing: 10
 
-        MDBoxLayout:
-            size_hint_y: 0.1
-            padding: 10
-            MDLabel:
-                text: "Community Chat"
-                font_style: "H5"
-                halign: "center"
+        MDLabel:
+            text: "Login"
+            halign: "center"
+            font_style: "H5"
 
-        MDBoxLayout:
-            size_hint_y: 0.2
-            padding: 10
-            spacing: 10
+        MDTextField:
+            id: login_email
+            hint_text: "Enter Email"
+            icon_right_name: "email"
+            size_hint_x: 0.8
+            pos_hint: {"center_x": 0.5}
 
-        MDBoxLayout:
-            size_hint_y: 0.1
-            padding: 10
-            spacing: 10
+        MDTextField:
+            id: login_password
+            hint_text: "Enter Password"
+            password: True
+            icon_right_name: "lock"
+            size_hint_x: 0.8
+            pos_hint: {"center_x": 0.5}
 
-            MDBoxLayout:
-                size_hint_x: 0.85
-                radius: [25, 25, 25, 25]
-                MDTextField:
-                    id: message_input
-                    hint_text: "How are you feeling?"
-                    mode: "rectangle"
-                    font_size: 18
-                    hint_text_color: 0.6, 0.6, 0.6, 1
+        MDRaisedButton:
+            text: "Login"
+            size_hint_x: 0.5
+            pos_hint: {"center_x": 0.5}
+            on_press: app.login_user()
 
-            MDIconButton:
-                size_hint_x: 0.15
-                md_bg_color: 0.8, 1, 0.8, 1
-                icon: "arrow-up-bold-circle"
-                on_release: root.send_message()
+        MDRaisedButton:
+            text: "Go to Register"
+            size_hint_x: 0.5
+            pos_hint: {"center_x": 0.5}
+            on_press: app.change_screen("register")
 
-        MDBoxLayout:
-            size_hint_y: 0.1
-            padding: [20, 10]
-            spacing: 40
-            md_bg_color: 0.96, 0.92, 0.88, 1
-
-            MDIconButton:
-                icon: "home"
-                on_release: app.change_screen("homepage")
-
-            MDIconButton:
-                icon: "chat"
-                on_release: app.change_screen("community")
-
-            MDIconButton:
-                icon: "chart-bar"
-                on_release: app.change_screen("analytics")
-
-            MDIconButton:
-                icon: "account"
-                on_release: app.change_screen("profile")
-
-<QuestionnaireScreen>:
+<RegisterScreen>:
+    name: "register"
     BoxLayout:
         orientation: 'vertical'
-        padding: 20
-        spacing: 15  # Reduce the overall spacing between components
+        padding: dp(20)
+        spacing: dp(10)
 
-        Label:
-            text: "How do you feel today?"
-            font_size: 22
-            color: 1, 0, 0, 1
-            halign: "center"
-            size_hint_y: None
-            height: dp(40)  # Fixed height for the title
+        MDTextField:
+            id: name
+            hint_text: "Enter Your Name"
 
-        # Question 1: How was your sleep?
-        BoxLayout:
-            orientation: 'vertical'
-            size_hint_y: None
-            height: dp(80)  # Reduced height for each question block
-            spacing: 8  # Reduced spacing between label and slider
+        MDTextField:
+            id: email
+            hint_text: "Enter Email"
 
-            Label:
-                text: "1. How was your sleep?"
-                font_size: 16
-                color: 1, 0, 0, 1
-                halign: "center"
-            Slider:
-                id: q1
-                min: 1
-                max: 5
-                value: 3
-                step: 1
+        MDTextField:
+            id: password
+            hint_text: "Enter Password"
+            password: True
 
-        # Question 2: How is your energy level?
-        BoxLayout:
-            orientation: 'vertical'
-            size_hint_y: None
-            height: dp(80)  # Same reduced height
-            spacing: 8
+        MDTextField:
+            id: confirm_password
+            hint_text: "Confirm Password"
+            password: True
 
-            Label:
-                text: "2. How is your energy level?"
-                font_size: 16
-                color: 1, 0, 0, 1
-                halign: "center"
-            Slider:
-                id: q2
-                min: 1
-                max: 5
-                value: 3
-                step: 1
-
-        # Question 3: How is your focus today?
-        BoxLayout:
-            orientation: 'vertical'
-            size_hint_y: None
-            height: dp(80)  # Same reduced height
-            spacing: 8
-
-            Label:
-                text: "3. How is your focus today?"
-                font_size: 16
-                color: 1, 0, 0, 1
-                halign: "center"
-            Slider:
-                id: q3
-                min: 1
-                max: 5
-                value: 3
-                step: 1
-
-        # Question 4: How social do you feel?
-        BoxLayout:
-            orientation: 'vertical'
-            size_hint_y: None
-            height: dp(80)  # Same reduced height
-            spacing: 8
-
-            Label:
-                text: "4. How social do you feel?"
-                font_size: 16
-                color: 1, 0, 0, 1
-                halign: "center"
-            Slider:
-                id: q4
-                min: 1
-                max: 5
-                value: 3
-                step: 1
-
-        # Question 5: How anxious or stressed are you?
-        BoxLayout:
-            orientation: 'vertical'
-            size_hint_y: None
-            height: dp(80)  # Same reduced height
-            spacing: 8
-
-            Label:
-                text: "5. How anxious or stressed are you?"
-                font_size: 16
-                color: 1, 0, 0, 1
-                halign: "center"
-            Slider:
-                id: q5
-                min: 1
-                max: 5
-                value: 3
-                step: 1
-
-        # Submit Button
-        Button:
-            text: "Submit"
-            size_hint_y: None
-            height: dp(50)  # Reduced height for the button
-            on_press: root.submit_responses()
-
-        # Result Label
-        Label:
-            id: result_label
+        MDLabel:
+            id: error_label
             text: ""
-            font_size: 18
-            color: 0, 0, 0, 1
-            halign: "center"
+            theme_text_color: "Error"
+
+        MDRaisedButton:
+            text: "Register"
+            on_release: root.register_user()
+
+        MDRaisedButton:
+            text: "Back to Login"
+            on_release: app.sm.current = "login"
+
+
+<QuestionnaireScreen>:
+    ScrollView:
+        BoxLayout:
+            orientation: 'vertical'
+            padding: dp(20)
+            spacing: dp(10)
             size_hint_y: None
-            height: dp(30)  # Reduced height for the result label
+            height: self.minimum_height
+
+            MDLabel:
+                text: "How do you feel today?"
+                font_style: "H5"
+                halign: "center"
+                size_hint_y: None
+                height: dp(50)
+
+            # Question 1
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint_y: None
+                height: dp(80)
+
+                MDLabel:
+                    text: "1. How was your sleep?"
+                    font_style: "Body1"
+                    size_hint_y: None
+                    height: dp(30)
+
+                MDSlider:
+                    id: q1
+                    min: 1
+                    max: 5
+                    value: 3
+                    step: 1
+
+            # Question 2
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint_y: None
+                height: dp(80)
+
+                MDLabel:
+                    text: "2. How is your energy level?"
+                    font_style: "Body1"
+                    size_hint_y: None
+                    height: dp(30)
+
+                MDSlider:
+                    id: q2
+                    min: 1
+                    max: 5
+                    value: 3
+                    step: 1
+
+            # Question 3
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint_y: None
+                height: dp(80)
+
+                MDLabel:
+                    text: "3. How is your focus today?"
+                    font_style: "Body1"
+                    size_hint_y: None
+                    height: dp(30)
+
+                MDSlider:
+                    id: q3
+                    min: 1
+                    max: 5
+                    value: 3
+                    step: 1
+
+            # Question 4
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint_y: None
+                height: dp(80)
+
+                MDLabel:
+                    text: "4. How are your stress levels?"
+                    font_style: "Body1"
+                    size_hint_y: None
+                    height: dp(30)
+
+                MDSlider:
+                    id: q4
+                    min: 1
+                    max: 5
+                    value: 3
+                    step: 1
+
+            # Question 5
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint_y: None
+                height: dp(80)
+
+                MDLabel:
+                    text: "5. How is your mood overall?"
+                    font_style: "Body1"
+                    size_hint_y: None
+                    height: dp(30)
+
+                MDSlider:
+                    id: q5
+                    min: 1
+                    max: 5
+                    value: 3
+                    step: 1
+
+            BoxLayout:
+                size_hint_y: None
+                height: dp(60)
+
+                MDRaisedButton:
+                    text: "Submit"
+                    size_hint_x: 0.6
+                    pos_hint: {"center_x": 0.5}
+                    on_release: root.submit_responses()  # 🔥 Fixed function call
+                    size_hint_y: None
+                    height: dp(50)
+
+
