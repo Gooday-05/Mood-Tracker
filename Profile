@@ -77,6 +77,10 @@ class SettingsScreen(BoxLayout):
         profile_button.bind(on_press=self.open_profile_popup)
         self.add_widget(profile_button)
 
+        change_password_button = Button(text="Change Password")
+        change_password_button.bind(on_press=self.open_change_password_popup)
+        self.add_widget(change_password_button)
+
         self.logout_button = Button(text="Logout")
         self.logout_button.bind(on_press=self.logout_user)
         self.add_widget(self.logout_button)
@@ -92,12 +96,17 @@ class SettingsScreen(BoxLayout):
         notifications_layout.add_widget(self.notifications_switch)
         self.notifications_switch.bind(on_press=self.on_toggle_notifications)
         self.add_widget(notifications_layout)
-    
+
     def open_profile_popup(self, instance):
         popup_content = ProfilePopup(self)
         self.popup = Popup(title="Profile Settings", content=popup_content, size_hint=(0.8, 0.5))
         self.popup.open()
-        
+
+    def open_change_password_popup(self, instance):
+        popup_content = ChangePasswordPopup(self)
+        self.popup = Popup(title="Change Password", content=popup_content, size_hint=(0.8, 0.5))
+        self.popup.open()
+
     def logout_user(self, instance):
         self.login_message.text = "Logged out successfully!"
         self.main_layout.update_profile("", "")  # Clears the profile info
@@ -105,13 +114,58 @@ class SettingsScreen(BoxLayout):
 
     def clear_login_message(self, dt):
         self.login_message.text = ""
-        
+
     def on_toggle_notifications(self, instance):
         instance.text = "ON" if instance.state == "down" else "OFF"
         print(f"Notifications Turned {instance.text}")
-    
+
     def go_back(self, instance):
         self.screen_manager.current = "main"
+
+class ChangePasswordPopup(BoxLayout):
+    def __init__(self, settings_screen, **kwargs):
+        super().__init__(**kwargs)
+        self.orientation = 'vertical'
+        self.settings_screen = settings_screen
+
+        self.old_password = TextInput(hint_text="Enter Old Password", password=True)
+        self.add_widget(self.old_password)
+
+        self.new_password = TextInput(hint_text="Enter New Password", password=True)
+        self.add_widget(self.new_password)
+
+        self.confirm_password = TextInput(hint_text="Confirm New Password", password=True)
+        self.add_widget(self.confirm_password)
+
+        self.message_label = Label(text="", size_hint=(1, None), height=30)
+        self.add_widget(self.message_label)
+
+        self.save_button = Button(text="Change Password")
+        self.save_button.bind(on_press=self.change_password)
+        self.add_widget(self.save_button)
+
+    def change_password(self, instance):
+        old_pw = self.old_password.text
+        new_pw = self.new_password.text
+        confirm_pw = self.confirm_password.text
+
+        if not old_pw or not new_pw or not confirm_pw:
+            self.message_label.text = "Please fill in all fields!"
+            return
+        
+        if new_pw != confirm_pw:
+            self.message_label.text = "New passwords do not match!"
+            return
+        
+        # Placeholder for password verification and update logic
+        print("Password changed successfully!")  
+        self.message_label.text = "Password changed successfully!"
+
+        Clock.schedule_once(self.close_popup, 2)  # Close after 2 seconds
+
+    def close_popup(self, dt):
+        self.settings_screen.popup.dismiss()
+
 
 class ProfilePopup(BoxLayout):
     def __init__(self, settings_screen, **kwargs):
