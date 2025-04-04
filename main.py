@@ -4,15 +4,76 @@ from kivy.lang import Builder
 from kivy.core.window import Window
 from kivy.metrics import dp
 import sqlite3
-from kivy.clock import Clock
+import hashlib
 
 Window.size = (dp(360), dp(640))
 Window.softinput_mode = "below_target"
 
 class StartScreen(Screen):
-    pass  
+    pass
+
+class RegisterScreen(Screen):
+    def register_user(self):
+        name = self.ids.name.text.strip()
+        email = self.ids.email.text.strip()
+        password = self.ids.password.text.strip()
+        confirm_password = self.ids.confirm_password.text.strip()
+
+        if not name or not email or not password:
+            self.ids.error_label.text = "All fields are required!"
+            return
+
+        if password != confirm_password:
+            self.ids.error_label.text = "Passwords do not match!"
+            return
+
+        hashed_password = hashlib.sha256(password.encode()).hexdigest()
+
+        conn = sqlite3.connect("mood_data.db")
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT id FROM users WHERE email=?", (email,))
+        if cursor.fetchone():
+            self.ids.error_label.text = "Email already exists!"
+            conn.close()
+            return
+
+        cursor.execute("INSERT INTO users (name, email, password) VALUES (?, ?, ?)", (name, email, hashed_password))
+        conn.commit()
+        conn.close()
+
+        self.manager.current = "login"
+
+
+class LoginScreen(Screen):
+    def login_user(self):
+        email = self.ids.email.text.strip()
+        password = self.ids.password.text.strip()
+
+        if not email or not password:
+            self.ids.error_label.text = "Fields cannot be empty!"
+            return
+
+        hashed_password = hashlib.sha256(password.encode()).hexdigest()
+
+        conn = sqlite3.connect("mood_data.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, name FROM users WHERE email=? AND password=?", (email, hashed_password))
+        user = cursor.fetchone()
+        conn.close()
+
+        if user:
+            self.manager.get_screen("homepage").user_id = user[0]
+            self.manager.get_screen("homepage").user_name = user[1]  # Store user name
+            self.manager.current = "homepage"
+        else:
+            self.ids.error_label.text = "Invalid email or password!"
+
 
 class HomePageScreen(Screen):
+    user_id = None
+    user_name = ""
+
     mood_mapping = {
         "Sad": 0,
         "Stressed": 1,
@@ -22,45 +83,24 @@ class HomePageScreen(Screen):
     }
 
     def on_enter(self):
-        """Fetch and update the mood slider when entering the home page."""
-        try:
+        if self.user_id:
             conn = sqlite3.connect("mood_data.db")
             cursor = conn.cursor()
-            cursor.execute("SELECT mood FROM moods ORDER BY id DESC LIMIT 1")
+            cursor.execute("SELECT mood FROM moods WHERE user_id=? ORDER BY id DESC LIMIT 1", (self.user_id,))
             result = cursor.fetchone()
-        except sqlite3.Error as e:
-            print("Database error:", e)
-            result = None
-        finally:
             conn.close()
 
-        if result:
-            self.set_mood(result[0])
+            if result:
+                self.set_mood(result[0])
+        self.ids.welcome_label.text = f"Welcome, {self.user_name}!"
 
     def set_mood(self, mood):
-        """Update the slider based on the stored mood."""
         mood_slider = self.ids.mood_slider
         if mood in self.mood_mapping:
             mood_slider.value = self.mood_mapping[mood]
 
-    def store_manual_mood(self):
-        """Save mood manually from slider."""
-        mood_slider = self.ids.mood_slider
-        reverse_mood_mapping = {v: k for k, v in self.mood_mapping.items()}
-        mood = reverse_mood_mapping.get(int(mood_slider.value), "Neutral")
-
-        try:
-            conn = sqlite3.connect("mood_data.db")
-            cursor = conn.cursor()
-            cursor.execute("INSERT INTO moods (score, mood) VALUES (?, ?)", (0, mood))
-            conn.commit()
-        except sqlite3.Error as e:
-            print("Database error:", e)
-        finally:
-            conn.close()
-
 class CommunityScreen(Screen):
-    pass  
+    pass
 
 class QuestionnaireScreen(Screen):
     def submit_responses(self):
@@ -75,22 +115,16 @@ class QuestionnaireScreen(Screen):
         total_score = sum(responses)
         mood = self.analyze_mood(total_score)
 
-        try:
-            conn = sqlite3.connect("mood_data.db")
-            cursor = conn.cursor()
-            cursor.execute("INSERT INTO moods (score, mood) VALUES (?, ?)", (total_score, mood))
-            conn.commit()
-        except sqlite3.Error as e:
-            print("Database error:", e)
-        finally:
-            conn.close()
+        conn = sqlite3.connect("mood_data.db")
+        cursor = conn.cursor()
+        user_id = self.manager.get_screen("homepage").user_id
 
-        # Show the mood result
-        self.ids.result_label.text = f"Your mood is: {mood}"
+        cursor.execute("INSERT INTO moods (user_id, score, mood) VALUES (?, ?, ?)", (user_id, total_score, mood))
+        conn.commit()
+        conn.close()
 
-        # Update mood in homepage and transition smoothly
         self.manager.get_screen("homepage").set_mood(mood)
-        Clock.schedule_once(lambda dt: self.transition_to_home(), 2)  # Wait 2 seconds before switching
+        self.manager.current = "homepage"
 
     def analyze_mood(self, score):
         if score <= 7:
@@ -104,40 +138,68 @@ class QuestionnaireScreen(Screen):
         else:
             return "Jolly"
 
-    def transition_to_home(self):
-        """Smoothly transition to the home page."""
-        self.manager.current = "homepage"
-
 class MindfulApp(MDApp):
     def build(self):
         self.init_db()
         Builder.load_file("mindfultracker.kv")
-        sm = ScreenManager()
-        sm.add_widget(StartScreen(name="start"))
-        sm.add_widget(HomePageScreen(name="homepage"))
-        sm.add_widget(CommunityScreen(name="community"))
-        sm.add_widget(QuestionnaireScreen(name="questionnaire"))
-        return sm
+        self.sm = ScreenManager()
+        self.sm.add_widget(StartScreen(name="start"))
+        self.sm.add_widget(LoginScreen(name="login"))
+        self.sm.add_widget(RegisterScreen(name="register"))
+        self.sm.add_widget(HomePageScreen(name="homepage"))
+        self.sm.add_widget(CommunityScreen(name="community"))
+        self.sm.add_widget(QuestionnaireScreen(name="questionnaire"))
+        self.sm.current = "login"
+        return self.sm
 
     def change_screen(self, screen_name):
-        self.root.current = screen_name
+        self.sm.current = screen_name
 
     def init_db(self):
-        try:
-            conn = sqlite3.connect("mood_data.db")
-            cursor = conn.cursor()
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS moods (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    score INTEGER,
-                    mood TEXT
-                )
-            """)
-            conn.commit()
-        except sqlite3.Error as e:
-            print("Database error:", e)
-        finally:
-            conn.close()
+        conn = sqlite3.connect("mood_data.db")
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT,
+                email TEXT UNIQUE,
+                password TEXT
+            )
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS moods (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER,
+                score INTEGER,
+                mood TEXT,
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            )
+        """)
+        conn.commit()
+        conn.close()
+
+    def init_db(self):
+        conn = sqlite3.connect("mood_data.db")
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT,
+                email TEXT UNIQUE,
+                password TEXT
+            )
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS moods (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER,
+                score INTEGER,
+                mood TEXT,
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            )
+        """)
+        conn.commit()
+        conn.close()
 
 if __name__ == "__main__":
     MindfulApp().run()
