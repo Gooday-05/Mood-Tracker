@@ -45,7 +45,7 @@ ScreenManager:
             font_size: 16
             background_color: 0.2, 0.2, 0.2, 1
             color: 1, 1, 1, 1
-            on_press: app.change_screen("login")
+            on_press: app.change_screen("homepage")
 
 <HomePageScreen>:
     canvas.before:
@@ -163,7 +163,8 @@ ScreenManager:
             text: "Login"
             size_hint_x: 0.5
             pos_hint: {"center_x": 0.5}
-            on_press: app.login_user()
+            on_press: root.login_user()
+
 
         MDRaisedButton:
             text: "Go to Register"
