@@ -1,3 +1,6 @@
+#:import dp kivy.metrics.dp
+#:import MDTopAppBar kivymd.uix.toolbar.MDTopAppBar
+
 ScreenManager:
     StartScreen:
         name: "start"
@@ -11,6 +14,10 @@ ScreenManager:
         name: "login"
     RegisterScreen:
         name: "register"
+    AnalyticsScreen:
+        name: "analytics"
+    ProfileScreen:
+        name: "profile"
 
 <StartScreen>:
     canvas.before:
@@ -20,32 +27,33 @@ ScreenManager:
             pos: self.pos
             size: self.size
 
-    Label:
-        text: "Mental Health Check-In"
-        font_size: 24
-        color: 0, 0, 0, 1
-        pos_hint: {"center_x": 0.5, "center_y": 0.8}
-
     BoxLayout:
         orientation: 'vertical'
-        spacing: 10
-        padding: 20
-        size_hint_y: 0.3
-        pos_hint: {"center_x": 0.5, "center_y": 0.5}
+        spacing: dp(20)
+        padding: dp(30)
 
-        Button:
+        MDLabel:
+            text: "Mental Health Check-In"
+            halign: "center"
+            font_style: "H5"
+            size_hint_y: None
+            height: dp(60)
+
+        Widget:
+
+        MDRaisedButton:
             text: "Take Questionnaire"
-            font_size: 16
-            background_color: 0.2, 0.2, 0.2, 1
-            color: 1, 1, 1, 1
+            size_hint_x: 0.7
+            pos_hint: {"center_x": 0.5}
             on_press: app.change_screen("questionnaire")
 
-        Button:
+        MDRaisedButton:
             text: "Login Directly"
-            font_size: 16
-            background_color: 0.2, 0.2, 0.2, 1
-            color: 1, 1, 1, 1
+            size_hint_x: 0.7
+            pos_hint: {"center_x": 0.5}
             on_press: app.change_screen("homepage")
+
+        Widget:
 
 <HomePageScreen>:
     canvas.before:
@@ -86,9 +94,17 @@ ScreenManager:
                 color: 0, 0, 0, 1
 
         BoxLayout:
-            size_hint_y: 0.15
+            size_hint_y: 0.25
             orientation: 'vertical'
             padding: 10
+            spacing: 10
+
+            Label:
+                id: mood_label
+                text: "Mood: Neutral"
+                font_size: 16
+                color: 0, 0, 0, 1
+                halign: 'center'
 
             Label:
                 text: "Select your mood"
@@ -104,34 +120,14 @@ ScreenManager:
                 step: 1
                 on_value: root.update_mood_label(self.value)
 
-            Button:
+            MDRaisedButton:
                 text: "Enter"
                 size_hint_y: None
                 height: dp(40)
                 pos_hint: {"center_x": 0.5}
                 on_press: root.store_manual_mood()
 
-        MDBoxLayout:
-            size_hint_y: 0.1
-            padding: [20, 10]
-            spacing: 40
-            md_bg_color: 0.96, 0.92, 0.88, 1
-
-            MDIconButton:
-                icon: "home"
-                on_release: app.change_screen("homepage")
-
-            MDIconButton:
-                icon: "chat"
-                on_release: app.change_screen("community")
-
-            MDIconButton:
-                icon: "chart-bar"
-                on_release: app.change_screen("analytics")
-
-            MDIconButton:
-                icon: "account"
-                on_release: app.change_screen("profile")
+        BottomNavBar:
 
 <LoginScreen>:
     BoxLayout:
@@ -147,7 +143,7 @@ ScreenManager:
         MDTextField:
             id: login_email
             hint_text: "Enter Email"
-            icon_right_name: "email"
+            icon_right: "email"
             size_hint_x: 0.8
             pos_hint: {"center_x": 0.5}
 
@@ -155,7 +151,7 @@ ScreenManager:
             id: login_password
             hint_text: "Enter Password"
             password: True
-            icon_right_name: "lock"
+            icon_right: "lock"
             size_hint_x: 0.8
             pos_hint: {"center_x": 0.5}
 
@@ -165,15 +161,12 @@ ScreenManager:
             pos_hint: {"center_x": 0.5}
             on_press: root.login_user()
 
-
-        MDRaisedButton:
+        MDTextButton:
             text: "Go to Register"
-            size_hint_x: 0.5
             pos_hint: {"center_x": 0.5}
             on_press: app.change_screen("register")
 
 <RegisterScreen>:
-    name: "register"
     BoxLayout:
         orientation: 'vertical'
         padding: dp(20)
@@ -206,10 +199,9 @@ ScreenManager:
             text: "Register"
             on_release: root.register_user()
 
-        MDRaisedButton:
+        MDTextButton:
             text: "Back to Login"
             on_release: app.sm.current = "login"
-
 
 <QuestionnaireScreen>:
     ScrollView:
@@ -227,18 +219,14 @@ ScreenManager:
                 size_hint_y: None
                 height: dp(50)
 
-            # Question 1
+            # 5 Questions
             BoxLayout:
                 orientation: 'vertical'
                 size_hint_y: None
                 height: dp(80)
-
                 MDLabel:
                     text: "1. How was your sleep?"
                     font_style: "Body1"
-                    size_hint_y: None
-                    height: dp(30)
-
                 MDSlider:
                     id: q1
                     min: 1
@@ -246,18 +234,13 @@ ScreenManager:
                     value: 3
                     step: 1
 
-            # Question 2
             BoxLayout:
                 orientation: 'vertical'
                 size_hint_y: None
                 height: dp(80)
-
                 MDLabel:
                     text: "2. How is your energy level?"
                     font_style: "Body1"
-                    size_hint_y: None
-                    height: dp(30)
-
                 MDSlider:
                     id: q2
                     min: 1
@@ -265,18 +248,13 @@ ScreenManager:
                     value: 3
                     step: 1
 
-            # Question 3
             BoxLayout:
                 orientation: 'vertical'
                 size_hint_y: None
                 height: dp(80)
-
                 MDLabel:
                     text: "3. How is your focus today?"
                     font_style: "Body1"
-                    size_hint_y: None
-                    height: dp(30)
-
                 MDSlider:
                     id: q3
                     min: 1
@@ -284,18 +262,13 @@ ScreenManager:
                     value: 3
                     step: 1
 
-            # Question 4
             BoxLayout:
                 orientation: 'vertical'
                 size_hint_y: None
                 height: dp(80)
-
                 MDLabel:
                     text: "4. How are your stress levels?"
                     font_style: "Body1"
-                    size_hint_y: None
-                    height: dp(30)
-
                 MDSlider:
                     id: q4
                     min: 1
@@ -303,18 +276,13 @@ ScreenManager:
                     value: 3
                     step: 1
 
-            # Question 5
             BoxLayout:
                 orientation: 'vertical'
                 size_hint_y: None
                 height: dp(80)
-
                 MDLabel:
                     text: "5. How is your mood overall?"
                     font_style: "Body1"
-                    size_hint_y: None
-                    height: dp(30)
-
                 MDSlider:
                     id: q5
                     min: 1
@@ -322,16 +290,152 @@ ScreenManager:
                     value: 3
                     step: 1
 
-            BoxLayout:
+            MDRaisedButton:
+                text: "Submit"
+                size_hint_x: 0.6
                 size_hint_y: None
-                height: dp(60)
+                height: dp(50)
+                pos_hint: {"center_x": 0.5}
+                on_release: root.submit_responses()
 
-                MDRaisedButton:
-                    text: "Submit"
-                    size_hint_x: 0.6
-                    pos_hint: {"center_x": 0.5}
-                    on_release: root.submit_responses()  # 🔥 Fixed function call
-                    size_hint_y: None
-                    height: dp(50)
+<CommunityScreen>:
+    canvas.before:
+        Color:
+            rgba: 0.94, 0.91, 0.85, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
 
+    BoxLayout:
+        orientation: "vertical"
 
+        MDBoxLayout:
+            size_hint_y: 0.1
+            padding: 10
+            canvas.before:
+                Color:
+                    rgba: 0, 0, 0, 1
+                Line:
+                    points: self.x, self.y, self.right, self.y
+                    width: 2
+            MDLabel:
+                text: "Community"
+                font_style: "H5"
+                halign: "center"
+            MDIconButton:
+                icon: "account-plus"
+                on_release: app.show_add_friend_dialog()
+
+        IconGrid:
+            size_hint_y: 0.3
+
+        MDBoxLayout:
+            size_hint_y: 0.2
+            padding: 10
+            spacing: 10
+
+        MDBoxLayout:
+            size_hint_y: 0.1
+            padding: 10
+            spacing: 10
+
+            MDBoxLayout:
+                size_hint_x: 0.85
+                radius: [25, 25, 25, 25]
+                MDTextField:
+                    id: message_input
+                    hint_text: "How are you feeling?"
+                    mode: "rectangle"
+                    size_hint_x: 0.9
+                    font_size: 18
+
+            MDIconButton:
+                size_hint_x: 0.15
+                md_bg_color: 0.8, 1, 0.8, 1
+                icon: "arrow-up-bold-circle"
+                font_size: 24
+                on_release: app.send_message()
+                radius: [25, 25, 25, 25]
+
+        BottomNavBar:
+
+<AnalyticsScreen>:
+    MDBoxLayout:
+        orientation: "vertical"
+        padding: dp(20)
+        spacing: dp(10)
+
+        MDTopAppBar:
+            title: "Mood Analytics"
+            elevation: 10
+            pos_hint: {"top": 1}
+
+        MDLabel:
+            id: sad_count
+            text: "Sad: 0"
+            halign: "center"
+            font_style: "H6"
+
+        MDLabel:
+            id: stressed_count
+            text: "Stressed: 0"
+            halign: "center"
+            font_style: "H6"
+
+        MDLabel:
+            id: neutral_count
+            text: "Neutral: 0"
+            halign: "center"
+            font_style: "H6"
+
+        MDLabel:
+            id: good_count
+            text: "Good: 0"
+            halign: "center"
+            font_style: "H6"
+
+        MDLabel:
+            id: jolly_count
+            text: "Jolly: 0"
+            halign: "center"
+            font_style: "H6"
+
+        MDRaisedButton:
+            text: "Back to Home"
+            size_hint_x: 0.6
+            pos_hint: {"center_x": 0.5}
+            on_release: app.change_screen("homepage")
+
+<ProfileScreen@Screen>:
+    MDLabel:
+        text: "Profile Screen Coming Soon!"
+        halign: "center"
+
+<BottomNavBar@MDBoxLayout>:
+    size_hint_y: None
+    height: dp(60)
+    spacing: dp(30)
+    padding: dp(10), 0
+    pos_hint: {"center_x": 0.5}
+    md_bg_color: 0.9, 0.9, 0.9, 1
+
+    MDIconButton:
+        icon: "home"
+        on_release: app.change_screen("homepage")
+
+    MDIconButton:
+        icon: "chat"
+        on_release: app.change_screen("community")
+
+    MDIconButton:
+        icon: "chart-bar"
+        on_release: app.change_screen("analytics")
+
+    MDIconButton:
+        icon: "account"
+        on_release: app.change_screen("profile")
+
+<IconGrid@GridLayout>:
+    cols: 4
+    spacing: dp(10)
+    padding: dp(10)
