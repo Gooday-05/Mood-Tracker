@@ -1,18 +1,26 @@
 from kivymd.app import MDApp
-from kivy.uix.screenmanager import ScreenManager, Screen
+from kivymd.uix.screen import MDScreen
+from kivy.uix.screenmanager import ScreenManager
 from kivy.lang import Builder
 from kivy.core.window import Window
 from kivy.metrics import dp
+from kivy.uix.gridlayout import GridLayout
 import sqlite3
 import hashlib
 
 Window.size = (dp(360), dp(640))
 Window.softinput_mode = "below_target"
 
-class StartScreen(Screen):
+
+class IconGrid(GridLayout):
     pass
 
-class RegisterScreen(Screen):
+
+class StartScreen(MDScreen):
+    pass
+
+
+class RegisterScreen(MDScreen):
     def register_user(self):
         name = self.ids.name.text.strip()
         email = self.ids.email.text.strip()
@@ -45,7 +53,7 @@ class RegisterScreen(Screen):
         self.manager.current = "login"
 
 
-class LoginScreen(Screen):
+class LoginScreen(MDScreen):
     def login_user(self):
         email = self.ids.login_email.text.strip()
         password = self.ids.login_password.text.strip()
@@ -66,13 +74,13 @@ class LoginScreen(Screen):
             home_screen = self.manager.get_screen("homepage")
             home_screen.user_id = user[0]
             home_screen.user_name = user[1]
-            home_screen.update_welcome_message()  # ✅ Updating label
-            self.manager.current = "start"
+            home_screen.update_welcome_message()
+            self.manager.current = "homepage"
         else:
             self.ids.error_label.text = "Invalid email or password!"
 
 
-class HomePageScreen(Screen):
+class HomePageScreen(MDScreen):
     user_id = None
     user_name = ""
 
@@ -87,15 +95,17 @@ class HomePageScreen(Screen):
     reverse_mood_mapping = {v: k for k, v in mood_mapping.items()}
 
     def on_enter(self):
+        self.update_welcome_message()
         if self.user_id:
             conn = sqlite3.connect("mood_data.db")
             cursor = conn.cursor()
             cursor.execute("SELECT mood FROM moods WHERE user_id=? ORDER BY id DESC LIMIT 1", (self.user_id,))
             result = cursor.fetchone()
             conn.close()
-
             if result:
                 self.set_mood(result[0])
+
+    def update_welcome_message(self):
         self.ids.greeting_label.text = f"Welcome, {self.user_name}!"
 
     def set_mood(self, mood):
@@ -115,54 +125,29 @@ class HomePageScreen(Screen):
         conn = sqlite3.connect("mood_data.db")
         cursor = conn.cursor()
         cursor.execute("INSERT INTO moods (user_id, score, mood) VALUES (?, ?, ?)",
-                       (self.user_id, mood_value * 5, mood))  # *5 just to mimic the questionnaire scale
+                       (self.user_id, mood_value * 5, mood))
         conn.commit()
         conn.close()
 
         self.ids.affirmation_label.text = f"Saved mood: {mood}"
 
 
-
-    mood_mapping = {
-        "Sad": 0,
-        "Stressed": 1,
-        "Neutral": 2,
-        "Good": 3,
-        "Jolly": 4
-    }
-
-    def on_enter(self):
-        self.update_welcome_message()
-        if self.user_id:
-            conn = sqlite3.connect("mood_data.db")
-            cursor = conn.cursor()
-            cursor.execute("SELECT mood FROM moods WHERE user_id=? ORDER BY id DESC LIMIT 1", (self.user_id,))
-            result = cursor.fetchone()
-            conn.close()
-
-            if result:
-                self.set_mood(result[0])
-
-    def update_welcome_message(self):
-        self.ids.greeting_label.text = f"Welcome, {self.user_name}!"  # ✅ Fixed label update
-
-    def set_mood(self, mood):
-        mood_slider = self.ids.mood_slider
-        if mood in self.mood_mapping:
-            mood_slider.value = self.mood_mapping[mood]
-
-class CommunityScreen(Screen):
+class CommunityScreen(MDScreen):
     pass
 
-class QuestionnaireScreen(Screen):
+
+class QuestionnaireScreen(MDScreen):
     def submit_responses(self):
-        responses = [
-            int(self.ids.q1.value),
-            int(self.ids.q2.value),
-            int(self.ids.q3.value),
-            int(self.ids.q4.value),
-            int(self.ids.q5.value)
-        ]
+        try:
+            responses = [
+                int(self.ids.q1.value),
+                int(self.ids.q2.value),
+                int(self.ids.q3.value),
+                int(self.ids.q4.value),
+                int(self.ids.q5.value)
+            ]
+        except ValueError:
+            return
 
         total_score = sum(responses)
         mood = self.analyze_mood(total_score)
@@ -190,10 +175,34 @@ class QuestionnaireScreen(Screen):
         else:
             return "Jolly"
 
+
+class AnalyticsScreen(MDScreen):
+    def on_enter(self):
+        self.update_mood_counts()
+
+    def update_mood_counts(self):
+        conn = sqlite3.connect("mood_data.db")
+        cursor = conn.cursor()
+
+        mood_list = ['Sad', 'Stressed', 'Neutral', 'Good', 'Jolly']
+        label_ids = ['sad_count', 'stressed_count', 'neutral_count', 'good_count', 'jolly_count']
+
+        for mood, label_id in zip(mood_list, label_ids):
+            cursor.execute("SELECT COUNT(*) FROM moods WHERE mood = ?", (mood,))
+            count = cursor.fetchone()[0]
+            self.ids[label_id].text = f"{mood}: {count}"
+
+        conn.close()
+
+
 class MindfulApp(MDApp):
     def build(self):
+        self.theme_cls.theme_style = "Light"
+        self.theme_cls.primary_palette = "Blue"
+
         self.init_db()
         Builder.load_file("mindfultracker.kv")
+
         self.sm = ScreenManager()
         self.sm.add_widget(StartScreen(name="start"))
         self.sm.add_widget(LoginScreen(name="login"))
@@ -201,6 +210,7 @@ class MindfulApp(MDApp):
         self.sm.add_widget(HomePageScreen(name="homepage"))
         self.sm.add_widget(CommunityScreen(name="community"))
         self.sm.add_widget(QuestionnaireScreen(name="questionnaire"))
+        self.sm.add_widget(AnalyticsScreen(name="analytics"))
         self.sm.current = "login"
         return self.sm
 
@@ -229,6 +239,7 @@ class MindfulApp(MDApp):
         """)
         conn.commit()
         conn.close()
+
 
 if __name__ == "__main__":
     MindfulApp().run()
